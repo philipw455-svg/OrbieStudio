@@ -1,0 +1,110 @@
+{
+  "version": "1.7.0",
+  "ref": "v1.7.0",
+  "published": "2026-11-04",
+  "publisher": "Cohesive",
+  "electron": "44.7.2",
+  "dependencies": {
+    "@lydell/node-pty": "1.2.0-beta.15",
+    "@xterm/xterm": "6.0.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/addon-web-links": "0.12.0",
+    "marked": "18.1.1",
+    "dompurify": "3.4.16"
+  },
+  "notes": "- Updates come from GitHub: every copy checks github.com/ki11phil0405-bit/agent-deck by itself every 10 minutes, downloads the new version, checks every file against its checksum, and offers Restart to update. No shared folder needed.\n- Bigger updates that need a new installer: one click downloads it from GitHub and starts it. Your teams, boards and settings stay.\n- If a copy can't reach GitHub or a shared folder, the title bar says \"Updates not connected\" with a Fix button.\n- The shared Google Drive folder still works as a backup, and Agent Deck now finds it by itself (My Drive\\Agent Deck on any drive letter).",
+  "installer": "https://github.com/ki11phil0405-bit/agent-deck/releases/download/v1.7.0/Agent-Deck-Setup-1.7.0.exe",
+  "installerSha256": "69fbd6e34c7d9da7c460e919c8cab009ae888467246a3faabb56b8e4b1d9ce2c",
+  "files": [
+    {
+      "path": "src/docs/Agent Deck Quick Guide.pdf",
+      "sha256": "c4b5e2167af4f6f4ce1cb40a838584327d190bf36bc5baf9d024413d01bd1d7d",
+      "size": 323367
+    },
+    {
+      "path": "src/main.js",
+      "sha256": "9d23a7ca4964e8b79309cf5f001f5da4bb33063ee5c107ec34571c6fd017374b",
+      "size": 90639
+    },
+    {
+      "path": "src/preload.js",
+      "sha256": "bb667ff3b8c930cd2245edff21a3d3a8d34414df0bb175e5419e97c351c84d10",
+      "size": 3624
+    },
+    {
+      "path": "src/presets.js",
+      "sha256": "3e0774a2a173202516839aaea169abb226f2b3483c45e6a007fd4250181a1fab",
+      "size": 14053
+    },
+    {
+      "path": "src/remote/index.html",
+      "sha256": "14acb814f80495d79a243760991f29f72a5468abe56454b68206a8379fb47951",
+      "size": 6271
+    },
+    {
+      "path": "src/remote/remote.css",
+      "sha256": "174ad5bcbc37661bc3eb03e771505b511ef06ebb97db4e471da2769472da46ad",
+      "size": 12047
+    },
+    {
+      "path": "src/remote/remote.js",
+      "sha256": "8d8cfd9b2f9e4437930cfbcb7fa4039d1a9e484f9af2b5acf4ab5c28aadfd137",
+      "size": 29758
+    },
+    {
+      "path": "src/remote.js",
+      "sha256": "ab91a576b9dcd3c5e582c0a01c1e2c94da22e7850f188d465ae5eab367878211",
+      "size": 13421
+    },
+    {
+      "path": "src/renderer/app.css",
+      "sha256": "e93bac35305b6a4e83be41fd4d75d77c8b58394435314efddc862749b5e645e9",
+      "size": 35104
+    },
+    {
+      "path": "src/renderer/app.js",
+      "sha256": "fc2ec6e6beb4d6812ed5aca5c1b15ae728e7e9139c4f088c6861ee2242861d1c",
+      "size": 128913
+    },
+    {
+      "path": "src/renderer/icon.png",
+      "sha256": "e339fd0e2a82cfda0199766636598274cdf12a2f144f26db4b01d95fc018c2ea",
+      "size": 29592
+    },
+    {
+      "path": "src/renderer/index.html",
+      "sha256": "a7a0bc587338cb09b70e7c47dc5e5358a5660136d21de860ed3fb62f573740dd",
+      "size": 1319
+    },
+    {
+      "path": "src/renderer/vendor/addon-fit.js",
+      "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+      "size": 1521
+    },
+    {
+      "path": "src/renderer/vendor/addon-web-links.js",
+      "sha256": "b74864125ef3889753b94e61eb4dabb99b2a27f920f0c9a7bd53cbe6d10f032a",
+      "size": 3100
+    },
+    {
+      "path": "src/renderer/vendor/marked.umd.js",
+      "sha256": "b82b9334406d8bdd16b6236c08de1cb65b2a859873ca9503d9cc0b292ca3c12a",
+      "size": 47956
+    },
+    {
+      "path": "src/renderer/vendor/purify.min.js",
+      "sha256": "2c90a9b46d6463f26038a29b686e82bc91de01fdac9d5229e7cfe3b360134ea2",
+      "size": 28885
+    },
+    {
+      "path": "src/renderer/vendor/xterm.css",
+      "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+      "size": 7112
+    },
+    {
+      "path": "src/renderer/vendor/xterm.js",
+      "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+      "size": 488663
+    }
+  ]
+}

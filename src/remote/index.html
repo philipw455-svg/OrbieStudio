@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a0b0e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Agent Deck">
+<title>Agent Deck</title>
+<link rel="icon" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+<link rel="stylesheet" href="/vendor/xterm.css">
+<link rel="stylesheet" href="/remote.css">
+</head>
+<body>
+<div id="pair" class="pair" hidden>
+  <form id="pair-form" class="pair-card" autocomplete="off">
+    <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span>Agent Deck</div>
+    <h1>Pair this device</h1>
+    <p>On your PC, open Agent Deck and click <b>Remote</b>. Type the 6-digit code shown there.</p>
+    <input id="pair-code" inputmode="numeric" pattern="[0-9 ]*" maxlength="7" placeholder="000000" aria-label="Pairing code" autofocus>
+    <input id="pair-name" maxlength="40" placeholder="Name for this device (optional), e.g. Phil's MacBook" aria-label="Device name">
+    <button class="btn primary" type="submit">Pair</button>
+    <p id="pair-err" class="err" role="alert"></p>
+    <p class="fine">A code works once. You stay signed in on this device until you sign it out here or on the PC.</p>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span><span class="bn">Agent Deck</span></div>
+    <select id="proj" aria-label="Project"></select>
+    <span id="conn" class="conn" title="Connection to the PC"><i></i><span>Connecting</span></span>
+    <span class="gap"></span>
+    <button id="menu-btn" class="btn ghost sm" aria-haspopup="true">⋯</button>
+  </header>
+  <div class="body">
+    <section class="pane pane-agents on" data-pane="agents">
+      <div id="chips" class="chips" role="tablist" aria-label="Agents"></div>
+      <div class="term-head">
+        <span id="th-name" class="th-name"></span>
+        <span id="th-note" class="th-note"></span>
+        <span class="gap"></span>
+        <button id="th-reply" class="btn ghost sm" hidden>Latest reply</button>
+        <button id="th-fit" class="btn ghost sm" title="Resize this agent's terminal to fit this screen. The PC window switches back when you resize it there.">Fit to this screen</button>
+        <button id="th-start" class="btn sm" hidden>Start</button>
+        <button id="th-stop" class="btn ghost sm danger" hidden>Stop</button>
+      </div>
+      <div id="terms" class="terms"><div id="term-empty" class="empty">No agents running on the PC yet.</div></div>
+      <form id="type-form" class="type-row" autocomplete="off">
+        <textarea id="type-text" rows="1" placeholder="Type to this agent. Start with / to run a command." aria-label="Message to this agent"></textarea>
+        <button class="btn primary" type="submit" aria-label="Send">Send</button>
+      </form>
+      <div id="keys" class="keys" aria-label="Keys">
+        <button data-k="\r">Enter</button><button data-k="\x1b">Esc</button><button data-k="\t">Tab</button><button data-k="\x1b[Z">⇧Tab</button>
+        <button data-k="\x1b[A">↑</button><button data-k="\x1b[B">↓</button><button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+        <button data-k="\x03">Ctrl+C</button><button id="slash-btn" type="button">/ cmds</button>
+      </div>
+    </section>
+    <aside class="side">
+      <nav class="side-tabs" role="tablist">
+        <button data-tab="talk" class="on">Talk <span id="needs-count" class="badge" hidden></span></button>
+        <button data-tab="replies">Replies <span id="rep-count" class="badge dot" hidden></span></button>
+        <button data-tab="tasks">Tasks</button>
+        <button data-tab="views">Views</button>
+        <button data-tab="feed">Feed</button>
+      </nav>
+      <section class="pane pane-talk on" data-pane="talk">
+        <form id="say-form" class="say" autocomplete="off">
+          <div class="say-h"><label for="say-to">Tell</label><select id="say-to"></select>
+            <label class="chk"><input type="checkbox" id="say-comment"> Comment</label></div>
+          <textarea id="say-text" rows="3" placeholder="Tell the team what you want. The Supervisor routes it. Dictate with Fn Fn on a Mac or the mic on your phone keyboard."></textarea>
+          <button class="btn primary" type="submit">Send</button>
+        </form>
+        <h3>Needs you</h3>
+        <div id="inbox" class="inbox"></div>
+        <h3>Team</h3>
+        <div id="map" class="map"></div>
+      </section>
+      <section class="pane pane-replies" data-pane="replies">
+        <div class="say-h"><label for="rep-who">Show</label><select id="rep-who"></select></div>
+        <div id="replies" class="replies"></div>
+      </section>
+      <section class="pane pane-tasks" data-pane="tasks">
+        <form id="task-form" class="task-add" autocomplete="off">
+          <input id="task-text" maxlength="300" placeholder="New card" aria-label="New card">
+          <select id="task-agent" aria-label="Owner"></select>
+          <button class="btn sm" type="submit">Add</button>
+        </form>
+        <div id="kanban" class="kanban"></div>
+      </section>
+      <section class="pane pane-views" data-pane="views"><div id="views" class="views"></div></section>
+      <section class="pane pane-feed" data-pane="feed"><ul id="feed" class="feed"></ul></section>
+    </aside>
+  </div>
+  <nav class="bottom" role="tablist" aria-label="Sections">
+    <button data-go="agents" class="on">Agents</button>
+    <button data-go="talk">Talk <span id="needs-count-b" class="badge" hidden></span></button>
+    <button data-go="replies">Replies</button>
+    <button data-go="tasks">Tasks</button>
+    <button data-go="views">Views</button>
+    <button data-go="feed">Feed</button>
+  </nav>
+</div>
+<div id="pop" class="pop" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+<script src="/vendor/xterm.js"></script>
+<script src="/vendor/addon-fit.js"></script>
+<script src="/vendor/marked.umd.js"></script>
+<script src="/vendor/purify.min.js"></script>
+<script src="/remote.js"></script>
+</body>
+</html>
