@@ -1,10 +1,13 @@
 // Writes update/manifest.json: the newest version, the git tag to download from, every app file with its SHA-256,
 // and the installer link. Agent Deck reads it from the main branch on GitHub every 10 minutes.
-// Run after `npm run dist`:  node build/release.js
+// Run after `npm run dist` and after committing the code:  node build/release.js
+// The files are downloaded from the commit that is checked out now (its SHA), so commit the code first,
+// then run this and commit update/manifest.json on top.
 'use strict';
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { execSync } = require('child_process');
 const root = path.join(__dirname, '..');
 const pkg = require(path.join(root, 'package.json'));
 const REPO = 'ki11phil0405-bit/agent-deck';
@@ -22,7 +25,7 @@ const notes = ((changes.split(/\n## /)[1] || '').split('\n').slice(1).join('\n')
 const exeName = `Agent-Deck-Setup-${pkg.version}.exe`;
 const exe = path.join(root, 'dist', exeName);
 const m = {
-  version: pkg.version, ref: 'v' + pkg.version, published: new Date().toISOString().slice(0, 10), publisher: 'Cohesive',
+  version: pkg.version, ref: execSync('git rev-parse HEAD', { cwd: root }).toString().trim(), published: new Date().toISOString().slice(0, 10), publisher: 'Cohesive',
   electron: pkg.agentDeck.electron, dependencies: pkg.dependencies, notes,
   installer: `https://github.com/${REPO}/releases/download/v${pkg.version}/${exeName}`,
   installerSha256: fs.existsSync(exe) ? sha(exe) : undefined,

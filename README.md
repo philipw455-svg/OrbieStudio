@@ -12,14 +12,14 @@ You also need Claude Code: in PowerShell run `irm https://claude.ai/install.ps1 
 
 ## Updates
 
-Every copy checks `update/manifest.json` on this repo's `main` branch every 10 minutes. When a newer version is listed, Agent Deck shows **Restart to update**, downloads each file from that version's tag, checks its SHA-256, backs up the current version and restarts. Updates that change the app's libraries download the new installer from the release instead.
+Every copy checks `update/manifest.json` on this repo's `main` branch every 10 minutes. When a newer version is listed, Agent Deck shows **Restart to update**, downloads each file from the commit that version lists, checks its SHA-256, backs up the current version and restarts. Updates that change the app's libraries download the new installer from the release instead.
 
 ## Publishing a new version (Cohesive)
 
 1. Change the code, add a `## x.y.z` section at the top of `CHANGES.md`, and set `version` in `package.json`.
 2. `npm ci` then `npm run dist` (builds `dist/Agent-Deck-Setup-x.y.z.exe`).
-3. `npm run release` (writes `update/manifest.json`).
-4. Commit, tag `vx.y.z`, push `main` and the tag, then create the GitHub release for the tag and attach the installer.
+3. Commit the code, then `npm run release` (writes `update/manifest.json`, pointing at that commit), commit it too, and push `main`.
+4. On GitHub, Releases > Draft a new release: tag `vx.y.z` (create it on publish), title `Agent Deck x.y.z`, attach `dist/Agent-Deck-Setup-x.y.z.exe`, Publish.
 
 Copies pick it up within 10 minutes.
 
