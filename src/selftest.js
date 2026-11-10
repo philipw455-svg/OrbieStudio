@@ -60,6 +60,10 @@ module.exports = {
     try {
       await new Promise(r => win.webContents.once('did-finish-load', r));
       await sleep(2500);
+      log('the app starts on Home', (await js(`S.page`)) === 'home' && (await js(`document.getElementById('page').hidden`)) === false && (await js(`document.querySelectorAll('#navbar .ptabs button').length`)) === 7);
+      await sleep(1200); await shot('00_home');
+      await js(`goPage('studio')`); await sleep(500);
+      log('the Studio tab shows the board', (await js(`S.tabs[0].el.hidden`)) === false && (await js(`document.getElementById('page').hidden`)) === true);
       log('project tab opened', (await js(`document.querySelectorAll('.tab').length`)) === 1);
       log('4 console tiles', (await js(`document.querySelectorAll('.tile .term').length`)) === 4);
       await shot('01_board');
@@ -319,6 +323,22 @@ module.exports = {
       await js(`setTheme('dark')`); await sleep(400);
       await js(`window.deck.saveSettings({ theme: 'nope' })`);
       log('an unknown theme is ignored', settings.theme === 'dark');
+      // pages: every screen draws real data of the open game
+      const drawn = {};
+      for (const pg of ['home', 'status', 'previews', 'usage', 'questions', 'team']) {
+        await js(`goPage('${pg}')`); await sleep(pg === 'usage' || pg === 'home' ? 1600 : 500);
+        drawn[pg] = await js(`document.querySelectorAll('#page .gcard').length`);
+        await shot('30_page_' + pg);
+      }
+      log('every page draws', Object.values(drawn).every(n => n > 0), JSON.stringify(drawn));
+      await js(`goPage('status')`); await sleep(300);
+      log('Status shows one card for each agent with a picture', (await js(`document.querySelectorAll('#page .agent-card .av img').length`)) === 4);
+      await js(`goPage('usage')`); await sleep(1600);
+      log('Usage shows the 19 stops and the rocket', (await js(`document.querySelectorAll('#page .stop').length`)) === 19 && (await js(`document.querySelectorAll('#page .track .rocket').length`)) === 1);
+      await js(`goPage('studio')`); await sleep(400);
+      const modes = [];
+      for (const m of ['orbit', 'lanes', 'timeline', 'flow', 'tree']) { await js(`document.querySelector('#navbar .lays button[aria-label="${m[0].toUpperCase() + m.slice(1)} layout"]').click()`); await sleep(500); modes.push(await js(`S.tabs[0].board.mode`)); if (m !== 'tree') await shot('31_layout_' + m); }
+      log('the five layouts arrange the board', modes.join(',') === 'orbit,lanes,timeline,flow,tree', modes.join(','));
       // team editor
       await js(`[...document.querySelectorAll('.toolbar .btn')].find(b=>b.textContent==='Team').click()`);
       await sleep(400);

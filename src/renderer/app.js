@@ -121,6 +121,7 @@ function select(options, value) { const s = h('select', { class: 'select' }); fo
 /* ------------------------------------------------------------------ title bar */
 
 function renderTabs() {
+  if (typeof pageDirty === 'function') pageDirty();
   const nav = document.getElementById('tabs');
   put(nav, ...S.tabs.map(ws => {
     const needs = ws.inbox.length;
@@ -140,6 +141,8 @@ function activate(key) {
   renderTabs();
   const ws = activeWs();
   if (ws) { positionTiles(ws); refitAll(ws); }
+  // pages.js: opening or picking a game shows its Studio; with no game the Home screen shows
+  if (typeof paintPage === 'function') { if (key && S.booted) S.page = 'studio'; if (!key && S.page === 'studio') S.page = 'home'; paintPage(); }
 }
 
 async function closeTab(ws) {
@@ -573,7 +576,7 @@ function mountConsole(ws, t, el, head, body, maxBtn) {
   const a = agentById(ws, t.agentId);
   const pill = h('span', { class: 'pill' }, h('span', { class: 'light' }), h('span', { class: 'pw' }));
   const acts = h('span', { class: 't-acts' });
-  head.append(h('span', { class: 't-dot' }), h('span', { class: 't-name', text: a.name }), h('span', { class: 't-role', text: a.role || '' }), h('span', { class: 't-gap' }), pill, acts);
+  head.append(avatar(a, ws, 20), h('span', { class: 't-name', text: a.name }), h('span', { class: 't-role', text: a.role || '' }), h('span', { class: 't-gap' }), pill, acts);
   const termEl = h('div', { class: 'term' });
   const off = h('div', { class: 'off' });
   body.append(termEl, off);
@@ -915,6 +918,24 @@ function arrange(ws, mode, quiet) {
     cons.forEach((t, i) => Object.assign(t, { x: 20 + (i % cols) * 680, y: 20 + Math.floor(i / cols) * 440, w: 660, h: 420 }));
   } else if (mode === 'row') {
     cons.forEach((t, i) => Object.assign(t, { x: 20 + i * 600, y: 20, w: 580, h: 640 }));
+  } else if (mode === 'lanes') {
+    // one tall lane for each agent, side by side
+    cons.forEach((t, i) => Object.assign(t, { x: 20 + i * 520, y: 20, w: 500, h: 680 }));
+  } else if (mode === 'timeline') {
+    // one wide row for each agent, top to bottom
+    cons.forEach((t, i) => Object.assign(t, { x: 20, y: 20 + i * 250, w: 1500, h: 232 }));
+  } else if (mode === 'orbit') {
+    // the lead in the center, the other agents on a ring around it
+    const rx = 880, ry = 520, cx = rx + 260, cy = ry + 180;
+    if (n) Object.assign(cons[0], { w: 620, h: 400, x: cx - 310, y: cy - 200 });
+    cons.slice(1).forEach((t, i) => { const a = -Math.PI / 2 + (i / Math.max(1, n - 1)) * Math.PI * 2; Object.assign(t, { w: 480, h: 320, x: Math.round(cx + rx * Math.cos(a) - 240), y: Math.round(cy + ry * Math.sin(a) - 160) }); });
+  } else if (mode === 'flow') {
+    // work flows from left to right: the lead, then the builders in a column, then the checker
+    const lead = cons[0], last = n > 2 ? cons[n - 1] : null, mid = cons.slice(1, last ? n - 1 : n);
+    const colH = Math.max(560, mid.length * 300 - 20);
+    if (lead) Object.assign(lead, { x: 20, y: 20 + Math.round((colH - 520) / 2), w: 560, h: 520 });
+    mid.forEach((t, i) => Object.assign(t, { x: 640, y: 20 + i * 300, w: 560, h: 280 }));
+    if (last) Object.assign(last, { x: 1260, y: 20 + Math.round((colH - 520) / 2), w: 520, h: 520 });
   } else {
     if (n) Object.assign(cons[0], { x: 20, y: 20, w: 760, h: Math.max(640, (n - 1) * 330 - 20) });
     cons.slice(1).forEach((t, i) => Object.assign(t, { x: 800, y: 20 + i * 330, w: 640, h: 310 }));
@@ -1234,8 +1255,9 @@ function renderMap(ws) {
     const st = c ? c.status : 'off';
     const sub = c && c.note ? c.note : (st === 'working' ? `Working · output ${ago(c.lastOutput)} ago` : st === 'needs' ? 'Waiting for your approval' : st === 'resting' ? 'Ready for the next step' : st === 'exited' ? 'Stopped' : (a.role || ''));
     return h('button', { class: 'agent', style: { '--c': a.color }, title: `${a.name}: ${STATUS_WORD[st]}`, on: { click: () => focusConsole(ws, a.id) } },
-      h('span', { class: 'sw' }), h('span', { class: 'an', text: a.name }), h('span', { class: 'pill s-' + st }, h('span', { class: 'light' }), STATUS_WORD[st]), h('span', { class: 'as', text: sub }));
+      avatar(a, ws, 26), h('span', { class: 'an', text: a.name }), h('span', { class: 'pill s-' + st }, h('span', { class: 'light' }), STATUS_WORD[st]), h('span', { class: 'as', text: sub }));
   }), h('div', { class: 'owner' }, h('span', { class: 'sw' }), 'You: answers, approvals and every publish.'));
+  if (typeof pageDirty === 'function') pageDirty();
 }
 
 function renderInbox(ws) {
@@ -1285,6 +1307,7 @@ function renderReplies(ws) {
   const list = Object.values(latest).sort((x, y) => y.at - x.at);
   if (!list.length) { put(ws.repliesEl, h('p', { class: 'empty-note', text: 'When an agent finishes a turn, its answer shows here, so you don\'t have to scroll its terminal.' })); return; }
   put(ws.repliesEl, list.map(r => replyCard(ws, r, false)));
+  if (typeof pageDirty === 'function') pageDirty();
 }
 function readAloud(text) {
   if (!window.speechSynthesis) return toast('Read aloud is not available on this PC.', 'err');
@@ -1349,7 +1372,7 @@ function folderItems(ws) {
 function mainMenu(anchor) {
   const ws = activeWs();
   menu(anchor, [
-    { label: 'Home', sub: 'Recent projects and this PC', run: () => activate(null) },
+    { label: 'Home', sub: 'Your games, the rocket and the agents', run: () => goPage('home') },
     ...folderItems(ws),
     { sep: true },
     { head: 'Settings' },
@@ -1799,5 +1822,6 @@ function updateHelpModal(u) {
     if (proj) S.tabs.push(makeWs(proj));
   }
   activate(S.tabs.length ? S.tabs[S.tabs.length - 1].key : null);
+  S.booted = true;
   for (const ws of S.tabs) if (!ws.team) { activate(ws.key); choosePreset(ws); break; }
 })();

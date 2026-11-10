@@ -11,6 +11,12 @@
 <ellipse cx="41" cy="62" rx="4" ry="2.500" fill="#ff9bb5"/>
 <ellipse cx="79" cy="62" rx="4" ry="2.500" fill="#ff9bb5"/>
 <path d="M55 61q5 4 10 0" fill="none" stroke="#16130f" stroke-width="2.800" stroke-linecap="round"/>
+<!-- space helmet: a glass dome with a glare and a small antenna -->
+<path d="M83 26l7-11" stroke="#fff" stroke-width="2.800" stroke-linecap="round"/>
+<circle cx="91" cy="13.500" r="4" fill="#ffd35c" stroke="#fff" stroke-width="1.600"/>
+<circle cx="60" cy="53" r="37" fill="#cfeaff" fill-opacity=".22" stroke="#fff" stroke-width="3.600" stroke-opacity=".95"/>
+<path d="M30.500 44a31 31 0 0 1 19-22" fill="none" stroke="#fff" stroke-width="4.200" stroke-linecap="round" opacity=".85"/>
+<path d="M28.500 53.500l.100 1" fill="none" stroke="#fff" stroke-width="4.200" stroke-linecap="round" opacity=".85"/>
 <path d="M12 72a48 15 0 0 0 96 0" transform="rotate(-16 60 72)" fill="none" stroke="#3a2456" stroke-width="12" stroke-linecap="round" opacity=".28"/>
 <path d="M12 72a48 15 0 0 0 96 0" transform="rotate(-16 60 72)" fill="none" stroke="#fff" stroke-width="7.500" stroke-linecap="round"/>
 <g transform="translate(106.100 56.500) rotate(-106) scale(1.250)">

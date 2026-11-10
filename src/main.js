@@ -954,7 +954,7 @@ function targetAgent(p, to) {
 
 async function usageReport(key, days) {
   const p = projects.get(key);
-  days = Math.max(1, Math.min(60, Number(days) || 14));
+  days = Math.max(1, Math.min(3650, Number(days) || 14)); // 3650 = the whole life of a game (the rocket flight)
   const root = path.join(os.homedir(), '.claude', 'projects');
   const since = Date.now() - days * 86400000;
   const hist = readJSON(path.join(p.agentsDir, 'session-history.json'), {});
