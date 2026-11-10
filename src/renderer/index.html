@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; font-src 'self' data:; connect-src 'self'">
-<title>Agent Deck</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: http:; base-uri 'none'; form-action 'none'; font-src 'self' data:; connect-src 'self'">
+<title>Orbie Studio</title>
 <link rel="stylesheet" href="vendor/xterm.css">
 <link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="glass.css">
 </head>
 <body>
 <header id="titlebar">
-  <button id="main-menu" class="brand" title="Main menu: projects, folders, Remote view, quick guide" aria-haspopup="menu"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Agent Deck</span><span class="caret" aria-hidden="true">▾</span></button>
+  <button id="main-menu" class="brand" title="Main menu: projects, folders, Remote view, quick guide" aria-haspopup="menu"><img class="logo" src="logo.svg" alt=""><span>Orbie Studio</span><span class="caret" aria-hidden="true">▾</span></button>
   <nav id="tabs" aria-label="Open projects"></nav>
   <button id="tab-add" class="tab-add" title="Open a project folder (Ctrl+O)" aria-label="Open a project folder">+</button>
   <div class="drag-fill"></div>

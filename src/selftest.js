@@ -10,6 +10,7 @@ const out = path.join(ROOT, 'shots');
 const results = [];
 const log = (name, ok, detail) => { results.push({ name, ok, detail }); console.log((ok ? 'PASS ' : 'FAIL ') + name + (detail ? ' :: ' + detail : '')); };
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+let settings = null;
 
 function post(port, p, body) {
   return new Promise((resolve) => {
@@ -28,7 +29,8 @@ module.exports = {
     fs.mkdirSync(out, { recursive: true });
     app.setPath('userData', path.join(ROOT, 'userdata'));
   },
-  prepare({ settings, saveSettings }) {
+  prepare({ settings: s0, saveSettings }) {
+    settings = s0;
     const proj = path.join(ROOT, 'Dev', 'demo-game');
     const agents = path.join(ROOT, 'Dev', 'agents');
     fs.mkdirSync(path.join(agents, 'demo-game'), { recursive: true });
@@ -243,11 +245,11 @@ module.exports = {
       const crypto = require('crypto');
       const ghFiles = ['src/main.js', 'src/remote/index.html', 'src/docs/Agent Deck Quick Guide.pdf'].map(rel => ({ path: rel, sha256: crypto.createHash('sha256').update(fs.readFileSync(path.join(srcRoot, rel))).digest('hex') }));
       const mineDeps = JSON.parse(fs.readFileSync(path.join(srcRoot, 'package.json'), 'utf8')).dependencies;
-      let ghManifest = { version: '9.9.8', ref: 'v9.9.8', electron: process.versions.electron, dependencies: mineDeps, notes: '- GitHub notes', files: ghFiles, installer: 'https://github.com/x/y/releases/download/v9.9.8/Agent-Deck-Setup-9.9.8.exe' };
+      let ghManifest = { product: 'orbie-studio', version: '9.9.8', ref: 'v9.9.8', electron: process.versions.electron, dependencies: mineDeps, notes: '- GitHub notes', files: ghFiles, installer: 'https://github.com/x/y/releases/download/v9.9.8/Orbie-Studio-Setup-9.9.8.exe' };
       let tamper = false;
       const gh = http.createServer((q, s2) => {
         const u = decodeURIComponent(q.url);
-        if (u === '/raw/main/update/manifest.json') { s2.writeHead(200, { 'Content-Type': 'application/json' }); return s2.end(JSON.stringify(ghManifest)); }
+        if (u === '/raw/main/update/orbie-studio.json') { s2.writeHead(200, { 'Content-Type': 'application/json' }); return s2.end(JSON.stringify(ghManifest)); }
         const m2 = u.match(/^\/raw\/v9\.9\.8\/(.+)$/);
         if (m2 && fs.existsSync(path.join(srcRoot, m2[1]))) { let b = fs.readFileSync(path.join(srcRoot, m2[1])); if (tamper && /main\.js$/.test(m2[1])) b = Buffer.concat([b, Buffer.from('//x')]); s2.writeHead(200); return s2.end(b); }
         s2.writeHead(404); s2.end();
@@ -262,6 +264,15 @@ module.exports = {
       let ghBad = ''; try { await ctx.updater.stage(ctx.updater.manifest()); } catch (e) { ghBad = e.message; }
       log('a changed file is refused', /checksum/.test(ghBad), ghBad);
       tamper = false;
+      // safety: an update list for another app (for example Agent Deck 1.7.0) is never offered
+      const goodManifest = ghManifest;
+      ghManifest = Object.assign({}, goodManifest, { product: 'agent-deck' });
+      G = await js(`window.deck.checkUpdate()`);
+      log('an update for another app is refused', !G.available && /another app/.test(G.githubError || ''), JSON.stringify(G).slice(0, 160));
+      ghManifest = Object.assign({}, goodManifest, { ref: '../../other/repo/main' });
+      G = await js(`window.deck.checkUpdate()`);
+      log('an update with a strange download place is refused', !G.available && /not valid/.test(G.githubError || ''), JSON.stringify(G).slice(0, 160));
+      ghManifest = goodManifest;
       ghManifest = Object.assign({}, ghManifest, { dependencies: Object.assign({}, mineDeps, { 'left-pad': '1.0.0' }) });
       G = await js(`window.deck.checkUpdate()`);
       log('GitHub library change offers the installer', G.needsInstaller && /releases\/download/.test(G.installer));
@@ -285,6 +296,29 @@ module.exports = {
       fs.writeFileSync(path.join(upd, 'package.json'), JSON.stringify(Object.assign({}, mine, { version: '9.9.9', dependencies: Object.assign({}, mine.dependencies, { 'left-pad': '1.0.0' }) })));
       U2 = await js(`window.deck.checkUpdate()`);
       log('library change needs the installer', U2.available && U2.needsInstaller);
+      // safety: a folder that holds another app is never offered as an update
+      fs.writeFileSync(path.join(upd, 'package.json'), JSON.stringify(Object.assign({}, mine, { name: 'agent-deck', version: '9.9.9' })));
+      U2 = await js(`window.deck.checkUpdate()`);
+      log('a folder with another app is not an update', !U2.available, JSON.stringify(U2).slice(0, 160));
+      // safety: the window cannot change where updates come from
+      const before = JSON.stringify([settings.updateRepo, settings.remote && settings.remote.enabled]);
+      await js(`window.deck.saveSettings({ updateRepo: 'evil/repo', remote: { enabled: true }, agentsRoot: '/' })`);
+      log('the window cannot change the update place', JSON.stringify([settings.updateRepo, settings.remote && settings.remote.enabled]) === before && settings.agentsRoot !== '/', JSON.stringify(settings.updateRepo));
+      // safety: the window can show a folder, but cannot make the PC run a file
+      const badOpen = await js(`window.deck.openPath(${JSON.stringify(path.join(__dirname, 'main.js'))}).then(() => 'opened', e => e.message)`);
+      log('the window cannot run a file', /Only folders/.test(badOpen), badOpen);
+      // safety: the local server ignores a request that a web page sent through another name
+      const rebind = await new Promise((resolve) => { const rq = http.request({ host: '127.0.0.1', port, path: `/mcp/${sup.token}`, method: 'POST', headers: { Host: 'evil.example', 'Content-Type': 'application/json' } }, (rs) => { resolve(rs.statusCode); rs.resume(); }); rq.on('error', () => resolve(0)); rq.end('{}'); });
+      log('the local server refuses another host name', rebind === 403, String(rebind));
+      // themes
+      await js(`setTheme('light')`); await sleep(500);
+      log('theme is saved', settings.theme === 'light' && (await js(`document.documentElement.dataset.theme`)) === 'light');
+      await shot('21_theme_light');
+      await js(`setTheme('aurora')`); await sleep(400); await shot('22_theme_aurora');
+      await js(`setTheme('midnight')`); await sleep(400); await shot('23_theme_midnight');
+      await js(`setTheme('dark')`); await sleep(400);
+      await js(`window.deck.saveSettings({ theme: 'nope' })`);
+      log('an unknown theme is ignored', settings.theme === 'dark');
       // team editor
       await js(`[...document.querySelectorAll('.toolbar .btn')].find(b=>b.textContent==='Team').click()`);
       await sleep(400);

@@ -1,4 +1,19 @@
-# Agent Deck changes
+# Orbie Studio changes
+
+## 1.0.0
+- New name: Agent Deck is now Orbie Studio, your team's AI game studio. New logo and new icon.
+- New look: glass panels on a soft color backdrop, with four themes. Open the main menu and pick Dusk, Daylight, Aurora or Midnight.
+- A soft light follows the mouse behind the panels.
+- Orbie Studio installs next to Agent Deck and keeps its own settings. The first start copies your recent projects and your agents folder from Agent Deck.
+- Safer updates: Orbie Studio reads its own update list (update/orbie-studio.json) and refuses a list or a folder that belongs to another app.
+- Safer updates: Orbie Studio no longer searches other drives and cloud folders for an update folder. It uses GitHub, or a folder that you pick.
+- Safer window: the window can change the theme only. It cannot change where updates come from, and it cannot make the PC run a file.
+- Safer web tiles: an embedded page gets no camera, no microphone and no other permission, and its links open in your browser.
+- Safer local server: the server that agents use to talk ignores requests that come through another host name.
+- The text cleaner library (DOMPurify) is updated to 3.4.17, which fixes known faults.
+- Paired Remote view devices are not copied from Agent Deck. Pair each device again.
+
+# Agent Deck changes (before Orbie Studio)
 
 ## 1.7.0
 - Updates come from GitHub: every copy checks github.com/ki11phil0405-bit/agent-deck by itself every 10 minutes, downloads the new version, checks every file against its checksum, and offers Restart to update. No shared folder needed.

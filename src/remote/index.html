@@ -6,8 +6,8 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#0a0b0e">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Agent Deck">
-<title>Agent Deck</title>
+<meta name="apple-mobile-web-app-title" content="Orbie Studio">
+<title>Orbie Studio</title>
 <link rel="icon" href="/icon.png">
 <link rel="apple-touch-icon" href="/icon.png">
 <link rel="stylesheet" href="/vendor/xterm.css">
@@ -16,9 +16,9 @@
 <body>
 <div id="pair" class="pair" hidden>
   <form id="pair-form" class="pair-card" autocomplete="off">
-    <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span>Agent Deck</div>
+    <div class="brand"><img class="logo" src="/icon.png" alt="">Orbie Studio</div>
     <h1>Pair this device</h1>
-    <p>On your PC, open Agent Deck and click <b>Remote</b>. Type the 6-digit code shown there.</p>
+    <p>On your PC, open Orbie Studio and click <b>Remote</b>. Type the 6-digit code shown there.</p>
     <input id="pair-code" inputmode="numeric" pattern="[0-9 ]*" maxlength="7" placeholder="000000" aria-label="Pairing code" autofocus>
     <input id="pair-name" maxlength="40" placeholder="Name for this device (optional), e.g. Phil's MacBook" aria-label="Device name">
     <button class="btn primary" type="submit">Pair</button>
@@ -29,7 +29,7 @@
 
 <div id="app" hidden>
   <header class="top">
-    <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span><span class="bn">Agent Deck</span></div>
+    <div class="brand"><img class="logo" src="/icon.png" alt=""><span class="bn">Orbie Studio</span></div>
     <select id="proj" aria-label="Project"></select>
     <span id="conn" class="conn" title="Connection to the PC"><i></i><span>Connecting</span></span>
     <span class="gap"></span>

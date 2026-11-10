@@ -19,6 +19,7 @@ button{cursor:pointer}
 ::-webkit-scrollbar{width:10px;height:10px} ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:10px;border:2px solid transparent;background-clip:padding-box}
 
 .brand{display:flex;align-items:center;gap:8px;font-weight:650;color:var(--fg-2);white-space:nowrap}
+.brand .logo{width:20px;height:20px;border-radius:5px;display:block}
 .mark{display:grid;grid-template-columns:repeat(2,6px);gap:2px}
 .mark i{width:6px;height:6px;border-radius:2px;background:var(--accent)} .mark i:nth-child(2){background:var(--work)} .mark i:nth-child(3){background:#f07cc8} .mark i:nth-child(4){background:var(--needs)}
 

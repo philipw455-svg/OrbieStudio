@@ -1,4 +1,4 @@
-// Agent Deck Remote view (browser side). Talks to the PC over /api/* and listens on /api/events.
+// Orbie Studio Remote view (browser side). Talks to the PC over /api/* and listens on /api/events.
 'use strict';
 
 const R = { projects: [], key: null, agent: null, terms: {}, es: null, connected: false, everConnected: false, slash: [] };
@@ -38,7 +38,7 @@ async function api(route, body) {
   const opt = body === undefined ? { method: 'GET', credentials: 'same-origin' }
     : { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'X-Agent-Deck': '1' }, body: JSON.stringify(body) };
   let r;
-  try { r = await fetch('/api/' + route, opt); } catch (e) { throw new Error('Can\'t reach the PC. Is Agent Deck open and on the same network?'); }
+  try { r = await fetch('/api/' + route, opt); } catch (e) { throw new Error('Can\'t reach the PC. Is Orbie Studio open and on the same network?'); }
   let data = null;
   try { data = await r.json(); } catch (e) {}
   if (r.status === 401 && data && data.error === 'pair') { showPair(); throw new Error('Pair this device first.'); }
@@ -232,7 +232,7 @@ function showAgent(agentId) {
   const a = agentById(agentId);
   const c = consoleOf(agentId);
   $('term-empty').hidden = !!c;
-  $('term-empty').textContent = a ? `${a.name} isn't running on the PC.` : (R.projects.length ? 'No agents in this project yet.' : 'Open a project in Agent Deck on the PC.');
+  $('term-empty').textContent = a ? `${a.name} isn't running on the PC.` : (R.projects.length ? 'No agents in this project yet.' : 'Open a project in Orbie Studio on the PC.');
   if (c && !R.terms[agentId]) makeTerm(agentId);
   const t = R.terms[agentId];
   if (t) { t.wrap.classList.add('on'); requestAnimationFrame(() => sizeTerm(t)); }
@@ -358,7 +358,7 @@ function renderInbox() {
   const items = (p && p.inbox) || [];
   const n = items.length;
   for (const id of ['needs-count', 'needs-count-b']) { $(id).hidden = !n; $(id).textContent = n; }
-  document.title = (n ? `(${n}) ` : '') + 'Agent Deck';
+  document.title = (n ? `(${n}) ` : '') + 'Orbie Studio';
   renderProjects();
   put($('inbox'), n ? items.slice().reverse().map(it => {
     const agentId = String(it.consoleId || '').split(':').pop();

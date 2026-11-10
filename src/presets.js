@@ -10,7 +10,7 @@ const COLORS = ['#3987e5', '#d95926', '#199e70', '#c98500', '#d55181', '#008300'
 
 const MCP = { roblox_studio: { command: 'cmd.exe', args: ['/c', '%LOCALAPPDATA%\\Roblox\\mcp.bat'] }, blender: { command: 'uvx', args: ['blender-mcp'] } };
 
-const TALK = 'You are in Agent Deck with the rest of the team: {team}. Talk to them only with the agent_deck tools: list_agents, send_message, handoff, report_status, ask_owner for the human owner, show_view to put your screenshots, reports and test output on the owner\'s board, and task_board to keep the shared kanban current.';
+const TALK = 'You are in Orbie Studio with the rest of the team: {team}. Talk to them only with the agent_deck tools: list_agents, send_message, handoff, report_status, ask_owner for the human owner, show_view to put your screenshots, reports and test output on the owner\'s board, and task_board to keep the shared kanban current.';
 const HOUSE = 'House rules: only the owner publishes or releases anything; never publish, upload or change live settings. Original work only: no real brands, logos, copyrighted characters or ripped assets. Keep the project\'s CLAUDE.md as the rule book and GAME_PLAN.md as the plan.';
 
 /* ---------------------------------------------------------------- what kind of project is this folder */

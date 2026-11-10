@@ -23,7 +23,7 @@ exports.default = async function afterPack(ctx) {
     vi.setFileVersion(v[0], v[1], v[2], 0);
     vi.setProductVersion(v[0], v[1], v[2], 0);
     const lang = vi.getAllLanguagesForStringValues()[0] || { lang: 1033, codepage: 1200 };
-    vi.setStringValues(lang, { ProductName: 'Agent Deck', FileDescription: 'Agent Deck', CompanyName: 'Cohesive', OriginalFilename: 'Agent Deck.exe', InternalName: 'Agent Deck', LegalCopyright: '' });
+    vi.setStringValues(lang, { ProductName: 'Orbie Studio', FileDescription: 'Orbie Studio', CompanyName: 'Cohesive', OriginalFilename: 'Orbie Studio.exe', InternalName: 'Orbie Studio', LegalCopyright: '' });
     vi.outputToResourceEntries(res.entries);
   }
   res.outputResource(exe);

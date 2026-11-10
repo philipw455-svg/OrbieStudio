@@ -1,4 +1,4 @@
-// Agent Deck: the window. Draws projects, the board of tiles, the terminals and the side rail.
+// Orbie Studio: the window. Draws projects, the board of tiles, the terminals and the side rail.
 // Everything that touches the PC (terminals, files, git, hooks) happens in the main process through window.deck.
 'use strict';
 
@@ -161,7 +161,7 @@ function renderWelcome() {
   const recent = (info.settings.recent || []);
   const ok = (good, title, sub) => h('div', { class: 'check' }, h('span', { class: good ? 'ok' : 'no', text: good ? '✓' : '!' }), h('div', null, h('b', { text: title }), h('div', { class: 'sub' }, sub)));
   put(el, h('div', { class: 'welcome-in' },
-    h('div', null, h('h1', { text: 'Agent Deck' }), h('p', { class: 'lede', text: 'Pick a project folder and its agents start up side by side: real Claude Code terminals on one board, talking to each other, with you in the loop.' })),
+    h('div', { class: 'hero' }, h('img', { src: 'logo.svg', alt: '' }), h('div', null, h('h1', { text: 'Orbie Studio' }), h('p', { class: 'tagline', text: 'Your team\'s AI game studio' }), h('p', { class: 'lede', text: 'Pick a project folder and its agents start up side by side: real Claude Code terminals on one board, talking to each other, with you in the loop.' }))),
     h('div', { class: 'w-actions' },
       h('button', { class: 'btn primary', on: { click: openProjectFlow } }, 'Open project folder', h('span', { class: 'k', text: 'Ctrl+O' })),
       S.tabs.length ? h('button', { class: 'btn', text: 'Back to ' + S.tabs[S.tabs.length - 1].name, on: { click: () => activate(S.tabs[S.tabs.length - 1].key) } }) : null),
@@ -181,7 +181,7 @@ function renderWelcome() {
           ok(!!info.settings.agentsRoot, 'Agents folder', h('span', null, info.settings.agentsRoot ? h('code', { text: info.settings.agentsRoot }) : 'Not set. Teams are saved in each project\'s .agents folder.', ' ',
             h('button', { class: 'btn sm ghost', text: 'Change', on: { click: async () => { const r = await safely(() => D.pickAgentsRoot()); if (r !== undefined) { S.info.settings.agentsRoot = r; renderWelcome(); } } } })))),
       )),
-    h('p', { class: 'empty-note' }, `Agent Deck ${info.version}, created and published by ${info.publisher || 'Cohesive'}. `,
+    h('p', { class: 'empty-note' }, `Orbie Studio ${info.version}, created and published by ${info.publisher || 'Cohesive'}. `,
       h('button', { class: 'btn sm ghost', text: 'Check for updates', on: { click: async () => { const u = await safely(() => D.checkUpdate()); if (u) { if (u.available) { showUpdate(u); updateModal(u); } else toast(`You have the newest version (${u.current}).`); } } } }),
       ' Agents run on your own Claude Code sign-in; nothing leaves this PC except what Claude Code itself sends.')));
 }
@@ -1215,7 +1215,7 @@ function launchersModal(ws) {
     draw();
   };
   modal({ title: 'Shortcuts', wide: true, body: [
-    h('p', { class: 'hint', style: 'font-size:13px;color:var(--fg-2)', text: 'Agent Deck reads the team and the project folder and lists the apps the agents need open: Roblox Studio and Blender for their MCP servers, Unreal for a .uproject, VS Code for the code. A green light means it is open now. Click a chip on the toolbar to open it.' }),
+    h('p', { class: 'hint', style: 'font-size:13px;color:var(--fg-2)', text: 'Orbie Studio reads the team and the project folder and lists the apps the agents need open: Roblox Studio and Blender for their MCP servers, Unreal for a .uproject, VS Code for the code. A green light means it is open now. Click a chip on the toolbar to open it.' }),
     box,
     h('div', { class: 'lbl', text: 'Add your own' }),
     h('div', { class: 'two' }, field('Name', name), field('Type', kind)), field('Target', target), h('div', { class: 'two' }, field('Arguments', args), field('Process name', proc)),
@@ -1307,6 +1307,30 @@ function repliesModal(ws, agentId) {
   modal({ title: 'Replies', wide: true, body: [h('div', { class: 'two', style: 'margin-bottom:8px' }, field('Show', sel), h('p', { class: 'hint', style: 'align-self:end', text: 'Each card is an agent\'s full answer at the end of a turn. Saved in the agents folder under logs\\replies.jsonl.' })), list] });
 }
 
+/* themes + the light that follows the mouse */
+
+const THEMES = [
+  { id: 'dark', name: 'Dusk', sub: 'Warm and dark' },
+  { id: 'light', name: 'Daylight', sub: 'Bright panels, dark terminals' },
+  { id: 'aurora', name: 'Aurora', sub: 'Green and blue' },
+  { id: 'midnight', name: 'Midnight', sub: 'Deep blue' },
+];
+function curTheme() { const t = S.info && S.info.settings && S.info.settings.theme; return THEMES.some(x => x.id === t) ? t : 'dark'; }
+function applyTheme(id) { document.documentElement.dataset.theme = THEMES.some(x => x.id === id) ? id : 'dark'; }
+function setTheme(id) {
+  if (!THEMES.some(x => x.id === id)) return;
+  applyTheme(id);
+  if (S.info && S.info.settings) S.info.settings.theme = id;
+  D.saveSettings({ theme: id }).catch(() => {});
+}
+(function mouseLight() {
+  let x = 0, y = 0, queued = false;
+  const paint = () => { queued = false; const r = document.documentElement.style; r.setProperty('--mx', x + 'px'); r.setProperty('--my', y + 'px'); document.body.classList.add('lit'); };
+  window.addEventListener('pointermove', (e) => { x = e.clientX; y = e.clientY; if (!queued) { queued = true; requestAnimationFrame(paint); } }, { passive: true });
+  document.documentElement.addEventListener('pointerleave', () => document.body.classList.remove('lit'));
+  window.addEventListener('blur', () => document.body.classList.remove('lit'));
+})();
+
 /* main menu + folder menu */
 
 function folderItems(ws) {
@@ -1332,6 +1356,9 @@ function mainMenu(anchor) {
     { label: 'Change agents folder…', sub: (S.info && S.info.settings.agentsRoot) || 'Not set', run: async () => { const r = await safely(() => D.pickAgentsRoot()); if (r !== undefined) { S.info.settings.agentsRoot = r; toast('Agents folder: ' + (r || 'not set')); if (!S.active) renderWelcome(); } } },
     { label: 'Change update folder…', sub: (S.info && S.info.updateSource) || '', run: async () => { const r = await safely(() => D.pickUpdateSource()); if (r) { S.info.updateSource = r; toast('Updates from ' + r); const u = await D.checkUpdate().catch(() => null); if (u) showUpdate(u); } } },
     { label: 'Remote view…', sub: S.remote && S.remote.enabled ? 'On' : 'Off', run: remoteModal },
+    { sep: true },
+    { head: 'Theme' },
+    ...THEMES.map(t => ({ label: t.name, sub: t.id === curTheme() ? 'On now' : t.sub, run: () => setTheme(t.id) })),
     { sep: true },
     { label: 'Quick guide (PDF)', sub: 'Save a 2-page explanation to share', run: downloadQuickGuide },
     { label: 'Shortcuts', k: 'F1', run: helpModal },
@@ -1473,10 +1500,10 @@ function teamModal(ws) {
       h('div', { class: 'two' }, field('Runs', cmdSel), isClaude ? field('Model', model) : h('div')), cmdIn,
       isClaude ? field('Permissions', mode, mode.value === 'bypassPermissions' ? 'The agent acts without asking. Only for work you can undo.' : 'What the agent may do without asking you first.') : null,
       isClaude ? field('Tools it can reach', h('div', { class: 'mcp-pick' },
-        h('label', { class: 'chkrow' }, rInherit, 'Your usual MCP servers, plus Agent Deck'),
-        h('label', { class: 'chkrow' }, rStrict, 'Only these, plus Agent Deck:'),
+        h('label', { class: 'chkrow' }, rInherit, 'Your usual MCP servers, plus Orbie Studio'),
+        h('label', { class: 'chkrow' }, rStrict, 'Only these, plus Orbie Studio:'),
         strict ? h('div', { style: 'display:flex;flex-wrap:wrap;gap:12px;padding-left:22px' }, keys.length ? keys.map(k => h('label', { class: 'chkrow' }, h('input', { type: 'checkbox', checked: a.mcp.includes(k), on: { change: (e) => { a.mcp = e.target.checked ? a.mcp.concat(k) : a.mcp.filter(x => x !== k); } } }), h('span', { class: 'mono', text: k }))) : h('span', { class: 'hint', text: 'No servers in the team list below yet.' })) : null),
-        'Agent Deck is how agents message each other and you. Limit Roblox Studio to the agents that should touch it.') : null,
+        'Orbie Studio is how agents message each other and you. Limit Roblox Studio to the agents that should touch it.') : null,
       isClaude ? field('Start prompt', prompt) : null,
       field('Extra arguments', extra),
       h('label', { class: 'chkrow' }, auto, 'Start with Launch team'),
@@ -1563,7 +1590,7 @@ function helpModal() {
     ['Fit everything', 'Ctrl+0'], ['Show / hide the side panel', 'Ctrl+\\'], ['Zoom in / out', 'Ctrl+= / Ctrl+-'], ['Zoom at the pointer', 'Ctrl+scroll'], ['Pan the board', 'Drag empty space or middle mouse'],
     ['Maximize a tile', 'Double-click its title'], ['Copy in a terminal', 'Select, then Ctrl+C or right-click'], ['Paste in a terminal', 'Ctrl+V or right-click'], ['Next project', 'Ctrl+Tab'], ['Close a dialog / restore', 'Esc']];
   modal({ title: 'Shortcuts', body: [h('div', { class: 'kbd' }, rows.flatMap(([a, k]) => [h('span', { text: a }), h('kbd', { text: k })])),
-    h('p', { class: 'hint', text: `Agent Deck ${S.info ? S.info.version : ''}. Created and published by ${(S.info && S.info.publisher) || 'Cohesive'}.` })],
+    h('p', { class: 'hint', text: `Orbie Studio ${S.info ? S.info.version : ''}. Created and published by ${(S.info && S.info.publisher) || 'Cohesive'}.` })],
     actions: [{ label: 'Save quick guide (PDF)', left: true, onClick: () => { downloadQuickGuide(); } }, { label: 'Close' }] });
 }
 
@@ -1699,7 +1726,7 @@ async function remoteModal() {
       h('button', { class: 'btn sm ghost', text: 'Copy', on: { click: () => { D.clipWrite(a.url); toast('Copied ' + a.url); } } })))
       : [h('p', { class: 'hint', text: 'This PC has no home-network address right now. Connect it to Wi-Fi or Ethernet, or install Tailscale.' })]) : [];
     put(body,
-      h('label', { class: 'chkrow big' }, toggle, h('span', null, h('b', { text: 'Let my other devices open this board' }), h('br'), h('span', { class: 'hint', text: 'Your Mac, iPhone or iPad opens Agent Deck in Safari or Chrome: live agent terminals (type and run / commands), Tell the team, Needs you, tasks, views and the feed.' }))),
+      h('label', { class: 'chkrow big' }, toggle, h('span', null, h('b', { text: 'Let my other devices open this board' }), h('br'), h('span', { class: 'hint', text: 'Your Mac, iPhone or iPad opens Orbie Studio in Safari or Chrome: live agent terminals (type and run / commands), Tell the team, Needs you, tasks, views and the feed.' }))),
       status,
       r.enabled && r.listening ? h('div', { class: 'rsec' }, h('h3', { text: '1. On your Mac or phone, open' }), addrs) : null,
       r.enabled && r.listening ? h('div', { class: 'rsec' }, h('h3', { text: '2. Type this pairing code' }),
@@ -1714,7 +1741,7 @@ async function remoteModal() {
         r.devices.length > 1 ? h('button', { class: 'btn sm ghost danger', text: 'Sign out every device', on: { click: async () => { const i = await safely(() => D.remoteSignOut('all')); if (i) { S.remote = i; render(); refreshRemoteButtons(); } } } }) : null),
       h('details', { class: 'rsec' }, h('summary', { text: 'Away from home, port and safety' }),
         h('p', { class: 'hint', text: 'Away from home: install Tailscale (free) on this PC and on your Mac or phone and sign in to both with the same account. A "Tailscale (anywhere)" address then appears above and works from anywhere, encrypted, without opening anything to the internet.' }),
-        h('p', { class: 'hint', text: 'The first time you turn this on, Windows asks whether Agent Deck may use the network. Allow it on Private networks only.' }),
+        h('p', { class: 'hint', text: 'The first time you turn this on, Windows asks whether Orbie Studio may use the network. Allow it on Private networks only.' }),
         h('p', { class: 'hint', text: 'Only devices on your home network or your Tailscale network can connect, and only after pairing. Anyone with a paired device can type into your agents, which can run programs on this PC, so pair only your own devices. On home Wi-Fi the connection is not encrypted; over Tailscale it is.' }),
         h('div', { class: 'row', style: 'display:flex;gap:8px;align-items:center' }, h('span', { class: 'hint', text: 'Port' }), portIn,
           h('button', { class: 'btn sm', text: 'Use this port', on: { click: async () => { const i = await safely(() => D.remoteSet({ port: portIn.value })); if (i) { S.remote = i; render(); } } } }))),
@@ -1741,8 +1768,8 @@ function showUpdate(u) {
 }
 function updateModal(u) {
   const live = S.tabs.reduce((n, ws) => n + Object.keys(ws.status).filter(id => running(ws, id)).length, 0);
-  modal({ title: `Agent Deck ${u.version}`, body: [
-    h('p', { class: 'hint', style: 'font-size:13px;color:var(--fg-2)', text: `You have ${u.current}. ${u.needsInstaller ? (u.installer ? 'This version changes the app\'s libraries, so it needs the full installer once. Agent Deck can download it from GitHub and start it; your teams, boards and settings stay.' : 'This version changes the app\'s libraries, so it needs the full installer once: get the newest Agent-Deck-Setup from Cohesive.') : 'Agent Deck downloads the new version from ' + u.source + ', checks every file, and restarts.'}` }),
+  modal({ title: `Orbie Studio ${u.version}`, body: [
+    h('p', { class: 'hint', style: 'font-size:13px;color:var(--fg-2)', text: `You have ${u.current}. ${u.needsInstaller ? (u.installer ? 'This version changes the app\'s libraries, so it needs the full installer once. Orbie Studio can download it from GitHub and start it; your teams, boards and settings stay.' : 'This version changes the app\'s libraries, so it needs the full installer once: get the newest Agent-Deck-Setup from Cohesive.') : 'Orbie Studio downloads the new version from ' + u.source + ', checks every file, and restarts.'}` }),
     u.notes ? h('div', { class: 'md', style: 'position:static;padding:0' }, ...(() => { const d = h('div'); renderMd(d, u.notes); return [d]; })()) : null,
     !u.needsInstaller && live ? h('p', { class: 'hint', text: `${live} agent${live === 1 ? '' : 's'} will stop. Use Launch team with "Resume where each agent left off" after the restart.` }) : null],
     actions: u.needsInstaller ? (u.installer ? [{ label: 'Later' }, { label: 'Download and install', primary: true, onClick: async () => { toast('Downloading the installer…'); const f = await D.downloadInstaller(); toast('Starting ' + f); } }] : [{ label: 'Close' }]) : [{ label: 'Later' }, { label: 'Restart to update', primary: true, onClick: async () => { await D.applyUpdate(); toast('Updating…'); } }] });
@@ -1750,10 +1777,10 @@ function updateModal(u) {
 D.on('update:available', showUpdate);
 function updateHelpModal(u) {
   modal({ title: 'Updates not connected', body: [
-    h('p', { class: 'hint', style: 'font-size:13px;color:var(--fg-2)', text: 'Agent Deck checks GitHub for new versions on its own every 10 minutes. This copy could not reach it' + (u && u.githubError ? ` (${u.githubError})` : '') + '.' }),
+    h('p', { class: 'hint', style: 'font-size:13px;color:var(--fg-2)', text: 'Orbie Studio checks GitHub for new versions on its own every 10 minutes. This copy could not reach it' + (u && u.githubError ? ` (${u.githubError})` : '') + '.' }),
     h('ol', { class: 'hint', style: 'font-size:13px;color:var(--fg-2);padding-left:18px;margin:6px 0' },
       h('li', { text: 'Check this PC is online, then click Check again.' }),
-      h('li', { text: 'If your network blocks GitHub, use the shared Google Drive folder instead: add the shared "Agent Deck" folder to My Drive (Drive for desktop), then click Choose folder and pick it.' })),
+      h('li', { text: 'If your network blocks GitHub, click Choose folder and pick a folder that holds the Orbie Studio code. Pick only a folder that you trust.' })),
   ], actions: [{ label: 'Choose folder', left: true, onClick: async () => { const r = await safely(() => D.pickUpdateSource()); if (r) { S.info.updateSource = r; const x = await D.checkUpdate().catch(() => null); if (x) { showUpdate(x); if (x.available) updateModal(x); else toast(`Connected. You have the newest version (${x.current}).`); } } } },
     { label: 'Close' }, { label: 'Check again', primary: true, onClick: async () => { const x = await safely(() => D.checkUpdate()); if (x) { showUpdate(x); if (x.available) updateModal(x); else if (x.connected) toast(`Connected. You have the newest version (${x.current}).`); else { toast('Still not connected.', 'err'); return false; } } } }] });
 }
@@ -1763,7 +1790,7 @@ function updateHelpModal(u) {
 (async function boot() {
   document.getElementById('tab-add').addEventListener('click', openProjectFlow);
   document.getElementById('main-menu').addEventListener('click', (e) => mainMenu(e.currentTarget));
-  try { S.info = await D.init(); document.body.classList.add(S.info.platform); S.remote = await D.remoteInfo().catch(() => null); } catch (e) { document.body.append(h('p', { style: 'padding:40px', text: 'Agent Deck could not start: ' + e.message })); return; }
+  try { S.info = await D.init(); applyTheme(curTheme()); document.body.classList.add(S.info.platform); S.remote = await D.remoteInfo().catch(() => null); } catch (e) { document.body.append(h('p', { style: 'padding:40px', text: 'Orbie Studio could not start: ' + e.message })); return; }
   renderWelcome();
   D.checkUpdate().then(showUpdate).catch(() => {});
   const reopen = (S.info.settings.openTabs || []).slice();

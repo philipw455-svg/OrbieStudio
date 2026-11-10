@@ -1,8 +1,8 @@
 {
-  "name": "agent-deck",
-  "productName": "Agent Deck",
-  "version": "1.7.0",
-  "description": "A command post for running Claude Code agents side by side on one board.",
+  "name": "orbie-studio",
+  "productName": "Orbie Studio",
+  "version": "1.0.0",
+  "description": "Your team's AI game studio. Claude Code agents build Roblox games side by side.",
   "author": "Cohesive",
   "license": "UNLICENSED",
   "main": "src/main.js",
@@ -18,7 +18,7 @@
     "@xterm/addon-fit": "0.11.0",
     "@xterm/addon-web-links": "0.12.0",
     "marked": "18.1.1",
-    "dompurify": "3.4.16"
+    "dompurify": "3.4.17"
   },
   "devDependencies": {
     "electron": "44.7.2",
@@ -26,8 +26,8 @@
     "resedit": "3.1.0"
   },
   "build": {
-    "appId": "com.ki11phil.agentdeck",
-    "productName": "Agent Deck",
+    "appId": "com.cohesive.orbiestudio",
+    "productName": "Orbie Studio",
     "copyright": "© 2026 Cohesive",
     "directories": {
       "output": "dist",
@@ -62,7 +62,7 @@
       ],
       "signAndEditExecutable": false,
       "icon": "build/icon.ico",
-      "executableName": "Agent Deck"
+      "executableName": "Orbie Studio"
     },
     "nsis": {
       "oneClick": false,
@@ -70,11 +70,11 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Agent Deck",
+      "shortcutName": "Orbie Studio",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
       "installerHeaderIcon": "build/icon.ico",
-      "artifactName": "Agent-Deck-Setup-${version}.exe",
+      "artifactName": "Orbie-Studio-Setup-${version}.exe",
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false
     },
@@ -82,9 +82,9 @@
       "en-US"
     ],
     "portable": {
-      "artifactName": "Agent-Deck-${version}-portable.exe",
+      "artifactName": "Orbie-Studio-${version}-portable.exe",
       "requestExecutionLevel": "user",
-      "unpackDirName": "AgentDeck"
+      "unpackDirName": "OrbieStudio"
     },
     "publish": null
   },

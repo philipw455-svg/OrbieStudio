@@ -1,4 +1,4 @@
-// Agent Deck: Remote view.
+// Orbie Studio: Remote view.
 // Serves a browser version of the board to the owner's other devices (a Mac, a phone) on the home network
 // or over Tailscale. Off by default. A device must pair once with a 6-digit code shown on the PC; after that
 // it keeps a long-lived cookie until the owner signs it out. Only private-network addresses may connect.
@@ -129,7 +129,7 @@ module.exports = function createRemote(deps) {
       f.n += 1; if (f.n >= 5) { f.until = Date.now() + 5 * 60000; f.n = 0; }
       fails.set(ip, f);
       failsSinceCode += 1;
-      if (failsSinceCode >= 15) { r.code = newCode(); failsSinceCode = 0; deps.saveSettings(); changed(); deps.notify('Remote view', 'Too many wrong pairing codes, so Agent Deck made a new one.'); }
+      if (failsSinceCode >= 15) { r.code = newCode(); failsSinceCode = 0; deps.saveSettings(); changed(); deps.notify('Remote view', 'Too many wrong pairing codes, so Orbie Studio made a new one.'); }
       return json(res, 401, { error: 'That code is not right. Check the code on the PC (Remote button).' });
     }
     fails.delete(ip);
@@ -141,7 +141,7 @@ module.exports = function createRemote(deps) {
     failsSinceCode = 0;
     deps.saveSettings();
     changed();
-    deps.notify('Remote view', `${dev.name} is now paired with Agent Deck.`);
+    deps.notify('Remote view', `${dev.name} is now paired with Orbie Studio.`);
     json(res, 200, { ok: true, device: dev.name }, { 'Set-Cookie': `adr=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=31536000` });
   }
 

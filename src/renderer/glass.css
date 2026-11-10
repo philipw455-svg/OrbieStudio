@@ -1,0 +1,97 @@
+/* Orbie Studio glass look. Loaded after app.css, so these rules win.
+   Four themes on <html data-theme>: dark (Dusk, the default), light (Daylight), aurora, midnight.
+   Terminals stay dark in every theme, because Claude Code draws its own dark colors. */
+
+:root{
+  --base:#14110e; --w1:rgba(255,168,92,.40); --w2:rgba(62,124,156,.50); --w3:rgba(122,70,50,.55); --w4:rgba(168,120,214,.24);
+  --bg:var(--base); --board:transparent; --panel:rgba(34,30,27,.56); --panel-2:rgba(255,255,255,.08); --raise:rgba(255,255,255,.14); --term:#0d0f14;
+  --solid:rgba(40,36,33,.95); --hi:rgba(255,255,255,.22);
+  --line:rgba(255,255,255,.12); --line-2:rgba(255,255,255,.20);
+  --fg:#ffffff; --fg-2:rgba(255,255,255,.86); --muted:rgba(255,255,255,.66); --faint:rgba(255,255,255,.44);
+  --accent:#8cc4ff; --accent-ink:#0a1626; --accent-hi:#b3d8ff;
+  --hover:rgba(255,255,255,.08); --dot:rgba(255,255,255,.10); --glow:rgba(255,236,214,.11);
+  --r:14px; color-scheme:dark;
+}
+:root[data-theme="aurora"]{
+  --base:#06130f; --w1:rgba(60,220,160,.38); --w2:rgba(70,120,255,.46); --w3:rgba(18,72,82,.62); --w4:rgba(190,110,255,.30);
+  --panel:rgba(12,34,29,.56); --solid:rgba(14,38,32,.96); --accent:#7df0c8; --accent-ink:#04201a; --accent-hi:#a6f6dc; --glow:rgba(125,240,200,.12);
+}
+:root[data-theme="midnight"]{
+  --base:#05060c; --w1:rgba(92,112,255,.34); --w2:rgba(30,62,150,.50); --w3:rgba(22,22,58,.62); --w4:rgba(255,120,200,.16);
+  --panel:rgba(16,18,36,.58); --solid:rgba(18,20,40,.96); --accent:#a9b8ff; --accent-ink:#0b1030; --accent-hi:#c6d0ff; --glow:rgba(150,170,255,.13);
+}
+:root[data-theme="light"]{
+  --base:#dde5ef; --w1:rgba(255,188,138,.80); --w2:rgba(138,190,255,.80); --w3:rgba(255,255,255,.85); --w4:rgba(198,170,255,.50);
+  --panel:rgba(255,255,255,.58); --panel-2:rgba(255,255,255,.50); --raise:rgba(255,255,255,.86);
+  --solid:rgba(255,255,255,.97); --hi:rgba(255,255,255,.95);
+  --line:rgba(20,28,48,.12); --line-2:rgba(20,28,48,.20);
+  --fg:#12151c; --fg-2:#2c3340; --muted:#4a5364; --faint:#6b7486;
+  --accent:#0b5fd0; --accent-ink:#ffffff; --accent-hi:#2b78e4;
+  --work:#08754a; --rest:#5b6475; --needs:#855200; --stop:#b52a27; --start:#5a45c9;
+  --hover:rgba(20,28,48,.07); --dot:rgba(20,28,48,.16); --glow:rgba(255,255,255,.75);
+  color-scheme:light;
+}
+
+/* backdrop: soft color waves, and a light that follows the mouse */
+html{background:var(--base)}
+body{background:
+  radial-gradient(55% 65% at 80% 26%,var(--w1),transparent 70%),
+  radial-gradient(50% 60% at 10% 16%,var(--w2),transparent 70%),
+  radial-gradient(70% 60% at 38% 106%,var(--w3),transparent 70%),
+  radial-gradient(42% 52% at 98% 98%,var(--w4),transparent 70%),
+  var(--base);
+  background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(520px circle at var(--mx,50%) var(--my,-40%),var(--glow),transparent 70%);opacity:0;transition:opacity .7s ease}
+body.lit::before{opacity:1}
+::selection{background:color-mix(in srgb,var(--accent) 40%,transparent)}
+::-webkit-scrollbar-thumb{background:var(--line-2);background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:var(--faint);background-clip:padding-box}
+
+/* glass surfaces */
+#titlebar{background:transparent;border-bottom-color:var(--line)}
+.toolbar,.side,.card,.modal,.kb,.gitc,.web form{-webkit-backdrop-filter:blur(30px) saturate(170%);backdrop-filter:blur(30px) saturate(170%);box-shadow:inset 0 1px 0 var(--hi)}
+.modal{box-shadow:inset 0 1px 0 var(--hi),0 30px 80px rgba(0,0,0,.45);border-radius:22px}
+.card{border-radius:20px;border-color:var(--line-2)}
+.welcome{background:none}
+.menu,.toast,.u-tip{background:var(--solid);-webkit-backdrop-filter:blur(30px) saturate(170%);backdrop-filter:blur(30px) saturate(170%);border-color:var(--line-2);box-shadow:inset 0 1px 0 var(--hi),0 18px 50px rgba(0,0,0,.35)}
+.menu{border-radius:16px;padding:6px}
+.menu button{border-radius:10px}
+.toast{border-radius:999px;padding:10px 18px}
+.composer{background:var(--panel);-webkit-backdrop-filter:blur(30px) saturate(170%);backdrop-filter:blur(30px) saturate(170%);border-radius:22px;box-shadow:inset 0 1px 0 var(--hi),0 18px 50px rgba(0,0,0,.35)}
+.board{background-image:radial-gradient(var(--dot) 1px,transparent 1.2px)}
+.tile{border-radius:18px;box-shadow:inset 0 1px 0 var(--hi),0 14px 36px rgba(0,0,0,.30)}
+.t-head{background:transparent}
+.tab.on{background:var(--panel);border-color:var(--line-2);box-shadow:inset 0 1px 0 var(--hi)}
+
+/* controls */
+.btn{border-radius:999px;box-shadow:inset 0 1px 0 var(--hi);transition:background .15s ease,transform .18s cubic-bezier(.3,1.4,.5,1)}
+.btn:hover:not(:disabled){background:var(--raise);border-color:var(--line-2);transform:scale(1.03)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover:not(:disabled){background:var(--accent-hi)}
+.btn.ghost{box-shadow:none}
+.btn.sm{border-radius:999px}
+.btn.ghost:hover:not(:disabled),.brand:hover,.tab:hover,.tab-add:hover,.tab .x:hover,.icon-btn:hover,.proj:hover,.zoom-pct:hover,.chk li:hover,.c-chip .x:hover{background:var(--hover)}
+.pill,.md code{background:var(--hover)}
+.zoom{border-radius:999px;padding:1px 4px}
+.input,.select,.textarea,.c-text,.c-to{border-radius:12px}
+.brand .logo{width:22px;height:22px;display:block;flex:none}
+.welcome .hero{display:flex;align-items:center;gap:18px}
+.welcome .hero img{width:76px;height:76px;flex:none;filter:drop-shadow(0 12px 24px rgba(0,0,0,.28))}
+.welcome .tagline{margin:2px 0 0;font-size:15px;font-weight:600;color:var(--fg-2)}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}.btn:hover:not(:disabled),.btn:active:not(:disabled){transform:none}body::before{transition:none}}
+
+/* Daylight: light panels, dark terminals */
+:root[data-theme="light"] .input,:root[data-theme="light"] .select,:root[data-theme="light"] .textarea,:root[data-theme="light"] .c-text,:root[data-theme="light"] .c-to,
+:root[data-theme="light"] .md pre,:root[data-theme="light"] .git-out,:root[data-theme="light"] .textv{background:rgba(255,255,255,.80)}
+:root[data-theme="light"] .t-body:not(.paper),:root[data-theme="light"] .imgv,:root[data-theme="light"] .mk-wrap{
+  --fg:#e7e9ef; --fg-2:#b9bdca; --muted:#838999; --faint:#5d6272; --line:rgba(255,255,255,.075); --line-2:rgba(255,255,255,.13);
+  --panel-2:#161922; --raise:#1b1f2a; --hover:rgba(255,255,255,.07); --accent:#8cc4ff; --accent-ink:#0a1626; --accent-hi:#b3d8ff; --hi:rgba(255,255,255,.12);
+  color:var(--fg)}
+:root[data-theme="light"] .scrim{background:rgba(30,40,62,.34)}
+:root[data-theme="light"] .tile{box-shadow:inset 0 1px 0 var(--hi),0 14px 36px rgba(40,55,90,.16)}
+:root[data-theme="light"] .menu,:root[data-theme="light"] .toast,:root[data-theme="light"] .u-tip,:root[data-theme="light"] .composer,:root[data-theme="light"] .modal{box-shadow:inset 0 1px 0 var(--hi),0 18px 50px rgba(40,55,90,.20)}
+:root[data-theme="light"] .tab .badge{color:#fff}
+:root[data-theme="light"] #update-bar{background:rgba(11,95,208,.10);border-color:rgba(11,95,208,.35)}
+.btn.primary .k{color:inherit;opacity:.72}

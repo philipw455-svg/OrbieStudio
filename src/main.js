@@ -1,4 +1,4 @@
-// Agent Deck: main process.
+// Orbie Studio: main process.
 // Owns the terminals (one real PTY per agent), the status engine, the local hook + agent-messaging server,
 // loops, hand-offs, git and the project files. The window only draws what this process tells it.
 'use strict';
@@ -46,6 +46,19 @@ function within(base, target) {
   const b = norm(base) + path.sep.toLowerCase();
   const t = norm(target);
   return t === norm(base) || t.startsWith(b);
+}
+
+// First start only: copy the recent projects and folders from Agent Deck. Update sources and paired remote
+// devices are not copied, so Orbie Studio starts with its own safe defaults.
+function importOldSettings() {
+  try {
+    if (fs.existsSync(settingsPath())) return;
+    const old = readJSON(path.join(app.getPath('appData'), 'Agent Deck', 'settings.json'), null);
+    if (!old || typeof old !== 'object' || Array.isArray(old)) return;
+    for (const k of ['updateRepo', 'updateFeedBase', 'updateSource', 'remote']) delete old[k];
+    fs.mkdirSync(userDir(), { recursive: true });
+    writeJSON(settingsPath(), old);
+  } catch (e) {}
 }
 
 let settings = null;
@@ -263,7 +276,7 @@ function buildClaudeArgs(p, a, c, opts) {
   if (!opts.resume && a.prompt) args.push(renderPrompt(a.prompt, p, a));
   if (a.model) args.push('--model', a.model);
   if (a.permissionMode && a.permissionMode !== 'default') args.push('--permission-mode', a.permissionMode);
-  // Status hooks + Agent Deck tools come from a per-console settings + MCP file.
+  // Status hooks + Orbie Studio tools come from a per-console settings + MCP file.
   fs.mkdirSync(runDir(), { recursive: true });
   // curl.exe (not the PowerShell alias), quoted "@-" so bash, cmd and PowerShell all pass stdin through.
   const hookCmd = (ev) => `${IS_WIN ? 'curl.exe' : 'curl'} -s -m 3 --noproxy 127.0.0.1 -X POST --data-binary "@-" http://127.0.0.1:${port}/hook/${c.token}/${ev}`;
@@ -648,7 +661,7 @@ function handleMcp(token, req, res, raw) {
       if (m.method === 'initialize') {
         result = { protocolVersion: (m.params && m.params.protocolVersion) || '2025-06-18', capabilities: { tools: { listChanged: false } },
           serverInfo: { name: 'agent_deck', version: app.getVersion() },
-          instructions: 'Agent Deck connects you to the other agents on this team and to the owner. Use list_agents first. Message agents with send_message or handoff; ask the human owner with ask_owner; show the owner your work with show_view.' };
+          instructions: 'Orbie Studio connects you to the other agents on this team and to the owner. Use list_agents first. Message agents with send_message or handoff; ask the human owner with ask_owner; show the owner your work with show_view.' };
       } else if (m.method === 'tools/list') {
         result = { tools: MCP_TOOLS };
       } else if (m.method === 'tools/call') {
@@ -677,6 +690,8 @@ function startServer() {
     server = http.createServer((req, res) => {
       const parts = (req.url || '').split('?')[0].split('/').filter(Boolean);
       if (req.socket.remoteAddress && !/^(::1|127\.0\.0\.1|::ffff:127\.0\.0\.1)$/.test(req.socket.remoteAddress)) { res.writeHead(403); return res.end(); }
+      const host = String(req.headers.host || '').toLowerCase();
+      if (host !== `127.0.0.1:${port}` && host !== `localhost:${port}`) { res.writeHead(403); return res.end(); }
       let raw = '';
       req.on('data', ch => { raw += ch; if (raw.length > 2e6) req.destroy(); });
       req.on('end', () => {
@@ -1159,37 +1174,44 @@ function runLauncher(key, id) {
 // anything is replaced. A shared folder (Google Drive, Documents\Dev\agent-deck) still works as a fallback.
 
 const UPDATE_REPO = 'ki11phil0405-bit/agent-deck';
-function updateRepo() { return settings.updateRepo === undefined ? UPDATE_REPO : settings.updateRepo; }
+const PRODUCT = 'orbie-studio';              // an update must carry this name, so an Agent Deck update can never install over Orbie Studio
+const UPDATE_LIST = 'update/orbie-studio.json';
+const TESTING = !!process.env.AGENT_DECK_SELFTEST && !app.isPackaged;
+function updateRepo() {
+  const r = settings.updateRepo === undefined ? UPDATE_REPO : settings.updateRepo;
+  if (r === '') return '';
+  return /^[\w.-]{1,60}\/[\w.-]{1,100}$/.test(String(r)) ? String(r) : UPDATE_REPO;
+}
 function feed() {
   const base = !app.isPackaged && settings.updateFeedBase; // self-test only
   const repo = updateRepo();
   if (!base && !repo) return null;
   return {
     label: base ? 'test feed' : 'GitHub (' + repo + ')',
-    manifest: base ? `${base}/raw/main/update/manifest.json` : `https://raw.githubusercontent.com/${repo}/main/update/manifest.json`,
+    manifest: base ? `${base}/raw/main/${UPDATE_LIST}` : `https://raw.githubusercontent.com/${repo}/main/${UPDATE_LIST}`,
     file: (ref, rel) => (base ? `${base}/raw/${ref}/` : `https://raw.githubusercontent.com/${repo}/${ref}/`) + rel.split('/').map(encodeURIComponent).join('/'),
   };
 }
 async function getBuf(url, max) {
   const { net } = require('electron');
-  const r = await net.fetch(url, { headers: { 'User-Agent': 'Agent-Deck/' + app.getVersion(), 'Cache-Control': 'no-cache' }, cache: 'no-store' });
+  const r = await net.fetch(url, { headers: { 'User-Agent': 'Orbie-Studio/' + app.getVersion(), 'Cache-Control': 'no-cache' }, cache: 'no-store' });
   if (!r.ok) throw new Error(`${url} answered ${r.status}`);
   const buf = Buffer.from(await r.arrayBuffer());
   if (max && buf.length > max) throw new Error('Download is too big.');
   return buf;
 }
 
-// A shared folder: the one picked in Settings, else the first that exists on this PC.
+// An update folder: the one the owner picked, or the owner's own source folder. Other drives and cloud folders are
+// not searched any more: anybody who can write to a shared folder could otherwise offer code to every copy.
+function isOurs(d) {
+  try { const pkg = readJSON(path.join(d, 'package.json'), null); return !!pkg && pkg.name === PRODUCT && fs.existsSync(path.join(d, 'src', 'main.js')); } catch (e) { return false; }
+}
 function folderCandidates() {
-  const home = os.homedir();
-  const c = [settings.updateSource, path.join(home, 'Documents', 'Dev', 'agent-deck'), path.join(home, 'My Drive', 'Agent Deck', 'agent-deck')];
-  if (IS_WIN) for (const L of 'GHIJKLMNOPQRSTUVWXYZDEF') c.push(`${L}:\\My Drive\\Agent Deck\\agent-deck`);
-  c.push(path.join(home, 'Google Drive', 'Agent Deck', 'agent-deck'), path.join(home, 'OneDrive', 'Agent Deck', 'agent-deck'));
-  return c.filter(Boolean);
+  return [settings.updateSource, path.join(os.homedir(), 'Documents', 'Dev', 'agent-deck')].filter(Boolean);
 }
 function updateSource() {
-  for (const d of folderCandidates()) { try { if (fs.existsSync(path.join(d, 'package.json')) && fs.existsSync(path.join(d, 'src', 'main.js'))) return d; } catch (e) {} }
-  return settings.updateSource || '';
+  for (const d of folderCandidates()) if (isOurs(d)) return d;
+  return '';
 }
 function newer(a, b) { const x = String(a).split('.').map(Number), y = String(b).split('.').map(Number); for (let i = 0; i < 3; i++) { if ((x[i] || 0) > (y[i] || 0)) return true; if ((x[i] || 0) < (y[i] || 0)) return false; } return false; }
 function sortObj(o) { const r = {}; for (const k of Object.keys(o || {}).sort()) r[k] = o[k]; return r; }
@@ -1206,7 +1228,7 @@ function notesFrom(text) {
 function checkFolder() {
   const src = updateSource();
   const pkg = src ? readJSON(path.join(src, 'package.json'), null) : null;
-  if (!pkg || !pkg.version) return null;
+  if (!pkg || pkg.name !== PRODUCT || !/^\d+\.\d+\.\d+$/.test(String(pkg.version || ''))) return null;
   const available = newer(pkg.version, app.getVersion());
   let notes = ''; try { notes = notesFrom(fs.readFileSync(path.join(src, 'CHANGES.md'), 'utf8')); } catch (e) {}
   return { via: 'folder', available, version: pkg.version, needsInstaller: available && needsInstallerFor(pkg.dependencies, (pkg.agentDeck && pkg.agentDeck.electron) || (pkg.devDependencies || {}).electron), notes, source: src };
@@ -1217,6 +1239,8 @@ async function checkGithub() {
   if (!f) return null;
   const m = JSON.parse((await getBuf(f.manifest, 2e6)).toString('utf8'));
   if (!m || !m.version || !Array.isArray(m.files) || !m.ref) throw new Error('The update list on GitHub is not valid.');
+  if (m.product !== PRODUCT) throw new Error('The update list on GitHub is for another app.');
+  if (!/^\d+\.\d+\.\d+$/.test(String(m.version)) || !/^[\w.-]{1,64}$/.test(String(m.ref)) || String(m.ref).includes('..')) throw new Error('The update list on GitHub is not valid.');
   lastManifest = m;
   const available = newer(m.version, app.getVersion());
   return { via: 'github', available, version: m.version, needsInstaller: available && needsInstallerFor(m.dependencies, m.electron), notes: String(m.notes || '').slice(0, 900), source: f.label, installer: m.installer || '' };
@@ -1280,7 +1304,7 @@ async function applyUpdate() {
 // For updates that change the app's libraries: download the installer from GitHub and run it.
 async function downloadInstaller() {
   const u = await checkUpdate();
-  if (!u.installer) throw new Error('No installer is listed for this version. Ask Cohesive for the newest Agent-Deck-Setup file.');
+  if (!u.installer) throw new Error('No installer is listed for this version. Ask Cohesive for the newest Orbie-Studio-Setup file.');
   if (!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+\/releases\/download\/[\w.%-]+\/[\w.%-]+\.exe$/.test(u.installer)) throw new Error('The installer link is not a GitHub release link, so it was not downloaded.');
   const buf = await getBuf(u.installer, 400e6);
   const out = path.join(app.getPath('downloads'), decodeURIComponent(u.installer.split('/').pop()));
@@ -1346,14 +1370,28 @@ function watchFile(p, rel, binary) {
 
 /* ------------------------------------------------------------------ window */
 
+// Window colors for each theme (the strip behind the minimize and close buttons on Windows).
+const THEME_BAR = {
+  dark: { color: '#14110e', symbolColor: '#e9e4de' },
+  light: { color: '#dde5ef', symbolColor: '#12151c' },
+  aurora: { color: '#06130f', symbolColor: '#d7efe6' },
+  midnight: { color: '#05060c', symbolColor: '#d6dcf5' },
+};
+function themeBar() { return Object.prototype.hasOwnProperty.call(THEME_BAR, settings.theme) ? THEME_BAR[settings.theme] : THEME_BAR.dark; }
+function applyThemeBar() {
+  if (!win || win.isDestroyed()) return;
+  try { win.setBackgroundColor(themeBar().color); } catch (e) {}
+  if (IS_WIN) { try { win.setTitleBarOverlay(Object.assign({ height: 38 }, themeBar())); } catch (e) {} }
+}
+
 function createWindow() {
   const b = settings.bounds || { width: 1500, height: 920 };
   win = new BrowserWindow({
     width: b.width, height: b.height, x: b.x, y: b.y, minWidth: 980, minHeight: 620,
-    backgroundColor: '#0a0b0e', show: false, title: 'Agent Deck',
+    backgroundColor: themeBar().color, show: false, title: 'Orbie Studio',
     icon: path.join(__dirname, 'renderer', 'icon.png'),
     titleBarStyle: IS_WIN ? 'hidden' : 'default',
-    titleBarOverlay: IS_WIN ? { color: '#0a0b0e', symbolColor: '#c9ccd6', height: 38 } : undefined,
+    titleBarOverlay: IS_WIN ? Object.assign({ height: 38 }, themeBar()) : undefined,
     webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, webviewTag: true, spellcheck: false },
   });
   Menu.setApplicationMenu(null);
@@ -1363,12 +1401,18 @@ function createWindow() {
   win.on('focus', () => win.flashFrame(false));
   win.webContents.setWindowOpenHandler(({ url }) => { if (/^https?:/.test(url)) shell.openExternal(url); return { action: 'deny' }; });
   win.webContents.on('will-navigate', (e) => e.preventDefault());
+  // Web tiles: an embedded page never gets a preload script, Node, or anything but a web address.
+  win.webContents.on('will-attach-webview', (e, prefs, params) => {
+    delete prefs.preload; delete prefs.preloadURL;
+    prefs.nodeIntegration = false; prefs.nodeIntegrationInSubFrames = false; prefs.contextIsolation = true; prefs.sandbox = true; prefs.webSecurity = true;
+    if (!/^(https?:\/\/|about:blank$)/i.test(String(params.src || ''))) e.preventDefault();
+  });
   win.on('close', (e) => {
     if (quitting) return;
     const running = [...consoles.values()].filter(c => c.pty).length;
     if (running) {
       const r = dialog.showMessageBoxSync(win, { type: 'warning', buttons: ['Close and stop agents', 'Cancel'], defaultId: 1, cancelId: 1,
-        title: 'Agent Deck', message: `${running} agent${running === 1 ? ' is' : 's are'} still running.`, detail: 'Closing Agent Deck stops them. Each Claude Code agent can resume its conversation next time.' });
+        title: 'Orbie Studio', message: `${running} agent${running === 1 ? ' is' : 's are'} still running.`, detail: 'Closing Orbie Studio stops them. Each Claude Code agent can resume its conversation next time.' });
       if (r !== 0) { e.preventDefault(); return; }
     }
     settings.maximized = win.isMaximized();
@@ -1440,8 +1484,8 @@ function remoteApi() {
 
 const QUICK_GUIDE = () => path.join(__dirname, 'docs', 'Agent Deck Quick Guide.pdf');
 async function saveQuickGuide() {
-  if (!fs.existsSync(QUICK_GUIDE())) throw new Error('The quick guide is missing from this copy of Agent Deck. Check for updates.');
-  const r = await dialog.showSaveDialog(win, { title: 'Save the Agent Deck quick guide', defaultPath: path.join(app.getPath('downloads'), 'Agent Deck Quick Guide.pdf'), filters: [{ name: 'PDF', extensions: ['pdf'] }] });
+  if (!fs.existsSync(QUICK_GUIDE())) throw new Error('The quick guide is missing from this copy of Orbie Studio. Check for updates.');
+  const r = await dialog.showSaveDialog(win, { title: 'Save the Orbie Studio quick guide', defaultPath: path.join(app.getPath('downloads'), 'Orbie Studio Quick Guide.pdf'), filters: [{ name: 'PDF', extensions: ['pdf'] }] });
   if (r.canceled || !r.filePath) return null;
   fs.copyFileSync(QUICK_GUIDE(), r.filePath);
   shell.openPath(r.filePath);
@@ -1466,11 +1510,11 @@ function wireIpc() {
     return r.canceled ? null : r.filePaths[0];
   });
   handle('updateSource:pick', async () => {
-    const r = await dialog.showOpenDialog(win, { title: 'Choose the Agent Deck update folder (the agent-deck folder)', defaultPath: updateSource() || app.getPath('home'), properties: ['openDirectory'] });
+    const r = await dialog.showOpenDialog(win, { title: 'Choose the Orbie Studio update folder', defaultPath: updateSource() || app.getPath('home'), properties: ['openDirectory'] });
     if (r.canceled) return updateSource();
     let d = r.filePaths[0];
     if (!fs.existsSync(path.join(d, 'package.json')) && fs.existsSync(path.join(d, 'agent-deck', 'package.json'))) d = path.join(d, 'agent-deck');
-    if (!fs.existsSync(path.join(d, 'package.json'))) throw new Error('That folder has no Agent Deck update in it. Pick the "Agent Deck" folder from the shared Drive, or the agent-deck folder inside it.');
+    if (!isOurs(d)) throw new Error('That folder has no Orbie Studio update in it. Pick the folder that holds the Orbie Studio code.');
     settings.updateSource = d; saveSettings(); return settings.updateSource;
   });
   handle('agentsRoot:pick', async () => {
@@ -1563,11 +1607,24 @@ function wireIpc() {
     return r;
   });
   handle('file:read', (key, rel) => { const p = projects.get(key); const f = resolveFile(p, rel); watchFile(p, rel); return fs.readFileSync(f, 'utf8'); });
-  handle('open:path', (target) => shell.openPath(target));
+  // Folders only: the window can show a folder, but it can never ask the PC to run a file.
+  handle('open:path', (target) => {
+    const t = String(target || '');
+    let dir = false; try { dir = path.isAbsolute(t) && fs.statSync(t).isDirectory(); } catch (e) {}
+    if (!dir) throw new Error('Only folders can be opened this way.');
+    return shell.openPath(t);
+  });
   handle('open:external', (url) => { if (/^https?:\/\//.test(url)) shell.openExternal(url); return true; });
   handle('clipboard:read', () => clipboard.readText());
   handle('clipboard:write', (t) => { clipboard.writeText(String(t)); return true; });
-  handle('settings:save', (patch) => { Object.assign(settings, patch || {}); saveSettings(); return settings; });
+  // The window may change only these settings. Where updates come from is never one of them.
+  handle('settings:save', (patch) => {
+    const ok = {};
+    if (patch && typeof patch.theme === 'string' && Object.prototype.hasOwnProperty.call(THEME_BAR, patch.theme)) ok.theme = patch.theme;
+    if (TESTING && patch) for (const k of ['updateFeedBase', 'updateSource']) if (typeof patch[k] === 'string') ok[k] = patch[k];
+    Object.assign(settings, ok); saveSettings(); applyThemeBar();
+    return settings;
+  });
 }
 
 /* ------------------------------------------------------------------ boot */
@@ -1577,9 +1634,9 @@ if (!gotLock) app.quit();
 else {
   app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(); win.focus(); } });
   app.whenReady().then(async () => {
-    if (IS_WIN) app.setAppUserModelId('com.ki11phil.agentdeck');
+    if (IS_WIN) app.setAppUserModelId('com.cohesive.orbiestudio');
     const st = process.env.AGENT_DECK_SELFTEST && !app.isPackaged ? require('./selftest') : null;
-    if (st) st.before(app);
+    if (st) st.before(app); else importOldSettings();
     loadSettings();
     await startServer();
     remote = createRemote({
@@ -1594,4 +1651,11 @@ else {
     if (st) st.after(win, { projects, consoles, updater: { check: checkUpdate, stage: stageGithub, manifest: () => lastManifest }, port: () => port, quit: () => { quitting = true; app.quit(); } });
   });
   app.on('window-all-closed', () => { if (remote) remote.stop(); app.quit(); });
+  // Embedded pages (web tiles): links open in the real browser, and a page gets no camera, microphone or other permission.
+  app.on('web-contents-created', (e, wc) => {
+    if (wc.getType() !== 'webview') return;
+    wc.setWindowOpenHandler(({ url }) => { if (/^https?:/i.test(url)) shell.openExternal(url); return { action: 'deny' }; });
+    wc.on('will-navigate', (ev, url) => { if (!/^https?:\/\//i.test(url)) ev.preventDefault(); });
+    try { const { session } = require('electron'); if (wc.session !== session.defaultSession) { wc.session.setPermissionRequestHandler((w, perm, cb) => cb(false)); wc.session.setPermissionCheckHandler(() => false); } } catch (x) {}
+  });
 }
