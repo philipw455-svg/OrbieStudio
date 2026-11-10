@@ -1,7 +1,7 @@
 {
   "product": "orbie-studio",
   "version": "1.0.0",
-  "ref": "6df40f841b2045f3476fd1d8cef656204ed716b0",
+  "ref": "909bad502dc4775e9952a9167e00f86555e98ece",
   "published": "2026-11-10",
   "publisher": "Cohesive",
   "electron": "44.7.2",
@@ -13,7 +13,7 @@
     "marked": "18.1.1",
     "dompurify": "3.4.17"
   },
-  "notes": "- First version of Orbie Studio, your team's AI game studio. Orbie Studio grew out of Agent Deck.\n- New look: glass panels on a soft color backdrop, with four themes. Open the main menu and pick Dusk, Daylight, Aurora or Midnight.\n- A soft light follows the mouse behind the panels.\n- New tab bar: Home, Studio, Previews, Status, Usage, Team and Questions. The app starts on Home.\n- Home shows your games, the agents, the open questions and the rocket flight of the open game.\n- Studio is the board with the live agent terminals. Five icons on the top right arrange the board: Tree, Orbit, Lanes, Timeline and Flow.\n- Previews shows the newest answer and the views of each agent.\n- Status shows one card for each agent, with Start, Stop and Open console.\n- Usage shows the rocket flight: 19 stops from Earth to the Andromeda Galaxy, for the tokens of the whole life of a game. The warning line is Saturn (1 billion tokens).\n- Questions shows each question and each approval, and you can write to one agent.\n- Team shows the plan only. The Team features need a shared online database, which is not built yet.\n- Each agent has a picture. The logo wears a space helmet.\n- Orbie Studio installs next to Agent Deck and keeps its own settings. The first start copies your recent projects and your agents folder from Agent Deck.\n- Safer updates: Orbie Studio reads its own update list (update/orbie-studio.json) and refuses a list or a folder that belongs to another app.\n- Safer updates: Orbie Studio no longer searches other drives and cloud folders for an update folder. It uses GitHub, or a folder that you pick.\n- Safer window: the window can change the theme only. It cannot change where updates come from, and it cannot make the PC run a file.\n- Safer web tiles: an embedded page gets no camera, no microphone and no other permission, and its links open in your browser.\n- Safer local server: the server that agents use to talk ignores requests that come through another host name.\n- The text cleaner library (DOMPurify) is updated to 3.4.17, which fixes known faults.\n- Paired Remote view devices are not copied from Agent Deck. Pair each device again.",
+  "notes": "- First version of Orbie Studio, your team's AI game studio. Orbie Studio grew out of Agent Deck.\n- New look: glass panels on a soft color backdrop, with four themes. Open the main menu and pick Dusk, Daylight, Aurora or Midnight.\n- A soft light follows the mouse behind the panels.\n- New tab bar: Home, Studio, Previews, Status, Usage, Team and Questions. The app starts on Home.\n- Home shows your games, the agents, the open questions and the rocket flight of the open game.\n- Studio is a canvas with one card for each agent. Lines show who gives work and who checks it. You can drag a card, and it snaps to the grid.\n- Click a card to see the agent in the side panel, with its newest answers and a message box. Double-click a card to open the big view with its live terminal.\n- Five icons on the top right arrange the cards: Tree, Orbit, Lanes, Timeline and Flow. Sticky notes stay on the canvas.\n- Previews shows the newest answer and the views of each agent.\n- Status shows one card for each agent, with Start, Stop and Open console.\n- Usage shows the rocket flight: 19 stops from Earth to the Andromeda Galaxy, for the tokens of the whole life of a game. The warning line is Saturn (1 billion tokens).\n- Questions shows each question and each approval, and you can write to one agent.\n- Team shows the plan only. The Team features need a shared online database, which is not built yet.\n- Each agent has a picture. The logo wears a space helmet.\n- Orbie Studio installs next to Agent Deck and keeps its own settings. The first start copies your recent projects and your agents folder from Agent Deck.\n- Safer updates: Orbie Studio reads its own update list (update/orbie-studio.json) and refuses a list or a folder that belongs to another app.\n- Safer updates: Orbie Studio no longer searches other drives and cloud folders for an update folder. It uses GitHub, or a folder that you pick.\n- Safer window: the window can change the theme only. It cannot change where updates come from, and it cannot make the PC run a file.\n- Safer web tiles: an embedded page gets no camera, no microphone and no other permission, and its links open in your browser.\n- Safer local server: the server that agents use to talk ignores requests that come through another host name.\n- The text cleaner library (DOMPurify) is updated to 3.4.17, which fixes known faults.\n- Paired Remote view devices are not copied from Agent Deck. Pair each device again.",
   "installer": "https://github.com/ki11phil0405-bit/agent-deck/releases/download/v1.0.0/Orbie-Studio-Setup-1.0.0.exe",
   "files": [
     {
@@ -58,8 +58,8 @@
     },
     {
       "path": "src/renderer/app.js",
-      "sha256": "1a8d9f7c40f991f3a27148fe2dfa3949492e68780f6adeccc19f3bbf028e8854",
-      "size": 132085
+      "sha256": "234d8acfb84de2b77b6c1804967a9cfa9c28632dccbdbf0c806759cbe114d78a",
+      "size": 132344
     },
     {
       "path": "src/renderer/av/art.svg",
@@ -138,8 +138,8 @@
     },
     {
       "path": "src/renderer/glass.css",
-      "sha256": "41abea052e84c775702b9382ba8471d4cae527decf5e6c5071a272c364ef1631",
-      "size": 7085
+      "sha256": "42caba85438a421d25223b7f5db1d1d68a3eb7bc3605081a3e2f967991183ae7",
+      "size": 7199
     },
     {
       "path": "src/renderer/icon.png",
@@ -148,8 +148,8 @@
     },
     {
       "path": "src/renderer/index.html",
-      "sha256": "0dc3a6f034da3e54076764868c17b8f597221c7ce69096064b8ae4b5424a236d",
-      "size": 1513
+      "sha256": "649d76ab7e1822878c3cb408ddb16743a82b286f7a7a9f58efd96cdf3563bede",
+      "size": 1547
     },
     {
       "path": "src/renderer/logo.svg",
@@ -158,13 +158,18 @@
     },
     {
       "path": "src/renderer/pages.css",
-      "sha256": "8ddfba456e4555f5b701971e0a2c4bf770ff9890deee07387c4d43d102f8b368",
-      "size": 12404
+      "sha256": "9685f5f0c9e4f2d97680f27670ccae5e333861eb30d18be5aad0a9ff43d70ea1",
+      "size": 16952
     },
     {
       "path": "src/renderer/pages.js",
-      "sha256": "2ef3b8d41b37d242d2abf326ae2c78935e4c4aa318138451fe63b0df7295b58c",
-      "size": 27774
+      "sha256": "927cbd221d60bb7c34468232f2051ff2a87c655919377b4b095c0387e22f541d",
+      "size": 27817
+    },
+    {
+      "path": "src/renderer/studio.js",
+      "sha256": "375eaa14bdb8e55a590db0097e616e5275b3a36fe0563fd668e45a437e301c95",
+      "size": 16900
     },
     {
       "path": "src/renderer/vendor/addon-fit.js",
