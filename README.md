@@ -10,6 +10,8 @@
   <a href="src/guide/Orbie%20Studio%20Quick%20Guide.pdf"><b>Quick guide (PDF)</b></a>
   &nbsp;·&nbsp;
   <a href="CHANGES.md"><b>What is new</b></a>
+  &nbsp;·&nbsp;
+  <a href="#support-orbie-studio"><b>Support</b></a>
 </p>
 
 <p align="center"><img src="build/guide/home.jpg" width="860" alt="The Home screen with games, agents and the rocket strip"></p>
@@ -121,6 +123,17 @@ Blue lines show who gives work. Dashed green lines show who checks the work.
 - **Open a game.** Press **Ctrl+O**.
 - **Claude Code help.** Read the [Claude Code documentation](https://code.claude.com/docs).
 - **Other questions.** Ask Cohesive, the team lead.
+
+## Support Orbie Studio
+
+Orbie Studio is free for the team. A tip helps Cohesive pay for the tools behind it.
+
+| Way to pay | Link |
+|---|---|
+| **Cash App** | [cash.app/$c0hesive](https://cash.app/$c0hesive) |
+| **Venmo** | [venmo.com/u/PhilipWerner455](https://venmo.com/u/PhilipWerner455) |
+
+A tip is a gift. It does not buy a license key.
 
 ---
 
