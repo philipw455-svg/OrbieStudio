@@ -59,6 +59,7 @@ contextBridge.exposeInMainWorld('deck', {
   clipRead: () => call('clipboard:read'),
   clipWrite: (t) => call('clipboard:write', t),
   saveSettings: (patch) => call('settings:save', patch),
+  openGuide: () => call('docs:guide'),
   intakeList: (key) => call('intake:list', key),
   intakeAdd: (key, slot, files) => call('intake:add', key, slot, files),
   intakePick: (key, slot) => call('intake:pick', key, slot),

@@ -20,6 +20,7 @@
 - Questions shows each question and each approval, and you can write to one agent.
 - Team shows the plan only. The Team features need a shared online database, which is not built yet.
 - Each agent has a picture. The logo wears a space helmet.
+- Quick guide: a new PDF explains the setup of the PC, the install and the first game, with links to every download. The first start offers it, and the main menu opens it. The installer also puts it in the install folder.
 - Orbie Studio installs next to Agent Deck and keeps its own settings. The first start copies your recent projects and your agents folder from Agent Deck.
 - Safer updates: Orbie Studio reads its own update list (update/orbie-studio.json) and refuses a list or a folder that belongs to another app.
 - Safer updates: Orbie Studio no longer searches other drives and cloud folders for an update folder. It uses GitHub, or a folder that you pick.

@@ -6,6 +6,8 @@ Created and published by **Cohesive**. © 2026 Cohesive. All rights reserved. Th
 
 ## Install
 
+Read the [quick guide (PDF)](src/docs/Orbie%20Studio%20Quick%20Guide.pdf): it explains the setup of the PC, with links to every download.
+
 Download **Orbie-Studio-Setup-x.y.z.exe** from the newest [release](https://github.com/ki11phil0405-bit/agent-deck/releases/latest) and run it. If Windows says "Windows protected your PC", click **More info**, then **Run anyway** (the app is not code-signed yet).
 
 You also need Claude Code: in PowerShell run `irm https://claude.ai/install.ps1 | iex`.
@@ -19,7 +21,7 @@ Every copy checks `update/orbie-studio.json` on this repo's `main` branch every 
 1. Change the code, add a `## x.y.z` section at the top of `CHANGES.md`, and set `version` in `package.json`.
 2. `npm ci` then `npm run dist` (builds `dist/Orbie-Studio-Setup-x.y.z.exe`).
 3. Commit the code, then `npm run release` (writes `update/orbie-studio.json`, pointing at that commit), commit it too, and push `main`.
-4. On GitHub, Releases > Draft a new release: tag `vx.y.z` (create it on publish), title `Orbie Studio x.y.z`, attach `dist/Orbie-Studio-Setup-x.y.z.exe`, Publish.
+4. On GitHub, Releases > Draft a new release: tag `vx.y.z` (create it on publish), title `Orbie Studio x.y.z`, attach `dist/Orbie-Studio-Setup-x.y.z.exe` and `src/docs/Orbie Studio Quick Guide.pdf`, Publish.
 
 Copies pick it up within 10 minutes.
 

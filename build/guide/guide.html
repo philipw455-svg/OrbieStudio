@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Orbie Studio Quick Guide</title>
+<style>
+@page{size:Letter;margin:16mm 15mm 16mm 15mm}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:10.6pt;line-height:1.45;color:#1b1d24}
+a{color:#0b5fd0;text-decoration:underline}
+h1{font-size:30pt;margin:0;letter-spacing:-.02em}
+h2{font-size:16pt;margin:0 0 6pt;padding-top:4pt;color:#2a1f44;break-after:avoid}
+h3{font-size:11.5pt;margin:10pt 0 3pt;break-after:avoid}
+p{margin:0 0 6pt}
+ol,ul{margin:0 0 6pt;padding-left:18pt}
+li{margin-bottom:2.5pt}
+code{font-family:Consolas,"Cascadia Mono",Menlo,monospace;font-size:9.6pt;background:#eef1f7;border-radius:4pt;padding:1pt 4pt}
+.cover{display:flex;align-items:center;gap:16pt;padding:16pt 18pt;border-radius:16pt;color:#fff;background:linear-gradient(120deg,#ffb066,#8a5aa8 55%,#2f7fa0)}
+.cover img{width:76pt;height:76pt;border-radius:18pt}
+.cover p{margin:2pt 0 0;font-size:13pt;font-weight:600}
+.cover small{display:block;margin-top:4pt;font-size:9.5pt;opacity:.92}
+.toc{margin:10pt 0 4pt;padding:10pt 14pt;border:1pt solid #d9deea;border-radius:12pt;columns:2;column-gap:20pt}
+.toc a{display:block;padding:1.5pt 0;text-decoration:none;font-weight:600}
+section{margin-top:12pt}
+table{width:100%;border-collapse:collapse;margin:4pt 0 8pt;font-size:10pt}
+th,td{text-align:left;vertical-align:top;padding:5pt 6pt;border-bottom:1pt solid #e1e5ee}
+th{font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#555d70}
+tr{break-inside:avoid}
+.tag{display:inline-block;padding:0 6pt;border-radius:8pt;font-size:8.6pt;font-weight:700;background:#e7f6ee;color:#08754a;white-space:nowrap}
+.tag.opt{background:#eef1f7;color:#4a5364}
+.note{padding:8pt 11pt;border-radius:10pt;background:#fff6e2;border:1pt solid #f0d79a;margin:6pt 0 8pt;break-inside:avoid}
+.note.safe{background:#eaf3ff;border-color:#b9d3f5}
+figure{margin:8pt 0;break-inside:avoid}
+figure img{width:100%;border-radius:8pt;border:1pt solid #cfd5e2;display:block}
+#canvas figure img{width:78%;margin:0 auto}
+h2{break-after:avoid}
+section>h2+*{break-before:avoid}
+#screens{break-before:page}
+figcaption{font-size:9pt;color:#555d70;margin-top:3pt}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10pt}
+.break{break-before:page}
+footer{margin-top:12pt;padding-top:6pt;border-top:1pt solid #d9deea;font-size:9pt;color:#555d70}
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <img src="logo.png" alt="Orbie Studio logo">
+  <div>
+    <h1>Orbie Studio</h1>
+    <p>Quick guide: set up, install and make your first game</p>
+    <small>Version 1.0 · Your team's AI game studio · Created and published by Cohesive</small>
+  </div>
+</div>
+
+<nav class="toc" aria-label="Contents">
+  <a href="#what">1. What Orbie Studio is</a>
+  <a href="#setup">2. Set up your PC</a>
+  <a href="#install">3. Install Orbie Studio</a>
+  <a href="#first">4. Make your first game</a>
+  <a href="#screens">5. The screens</a>
+  <a href="#canvas">6. The Studio canvas</a>
+  <a href="#safety">7. Safety rules</a>
+  <a href="#help">8. Updates and help</a>
+</nav>
+
+<section id="what">
+<h2>1. What Orbie Studio is</h2>
+<p>Orbie Studio runs a team of AI agents that build a Roblox game with you. Each agent is one Claude Code session with its own job, its own context and its own memory. You see every agent on one screen, you answer their questions, and you approve their work.</p>
+<p>The agents work in the folder of your game on your own PC. They use your own Claude Code sign-in.</p>
+</section>
+
+<section id="setup">
+<h2>2. Set up your PC</h2>
+<p>Do these steps once. Each link opens the official page.</p>
+<table>
+<tr><th style="width:24%">What</th><th style="width:13%">Need</th><th>How</th></tr>
+<tr><td><b>Windows 10 or 11</b></td><td><span class="tag">Required</span></td><td>Orbie Studio 1.0 runs on Windows. A Mac version is planned.</td></tr>
+<tr><td><b>Claude Code</b></td><td><span class="tag">Required</span></td><td>Open PowerShell and run <code>irm https://claude.ai/install.ps1 | iex</code>. Then run <code>claude</code> once and sign in. Full steps: <a href="https://code.claude.com/docs/en/setup">Claude Code setup guide</a>.</td></tr>
+<tr><td><b>Roblox Studio</b></td><td><span class="tag">Required</span></td><td>Download Roblox Studio from the <a href="https://create.roblox.com/">Roblox Creator Hub</a>. Sign in with your Roblox account.</td></tr>
+<tr><td><b>Blender</b></td><td><span class="tag opt">Optional</span></td><td>The art agent makes 3D models in Blender. Download it from <a href="https://www.blender.org/download/">blender.org</a>.</td></tr>
+<tr><td><b>Git for Windows</b></td><td><span class="tag opt">Optional</span></td><td>Git saves versions of your game. Download it from <a href="https://git-scm.com/download/win">git-scm.com</a>.</td></tr>
+<tr><td><b>Tailscale</b></td><td><span class="tag opt">Optional</span></td><td>Remote view shows your board on a phone or a Mac. Away from home it needs <a href="https://tailscale.com/download">Tailscale</a>.</td></tr>
+</table>
+<div class="note"><b>Check your setup.</b> Open Orbie Studio and look at the bottom of the Home screen. Green marks next to "Claude Code", "Git" and "Status lights" mean that the PC is ready.</div>
+</section>
+
+<section id="install">
+<h2>3. Install Orbie Studio</h2>
+<ol>
+<li>Open the <a href="https://github.com/ki11phil0405-bit/agent-deck/releases/latest">newest release on GitHub</a>.</li>
+<li>Download <code>Orbie-Studio-Setup-1.0.0.exe</code>. This guide is on the same page.</li>
+<li>Run the installer. Windows may say "Windows protected your PC". Click <b>More info</b>, then <b>Run anyway</b>. The app is not code-signed yet.</li>
+<li>Open Orbie Studio from the desktop or the Start menu.</li>
+</ol>
+<p>The installer also puts this guide in the install folder. In the app, open the main menu (top left) and click <b>Quick guide (PDF)</b>.</p>
+</section>
+
+<section id="first">
+<h2>4. Make your first game</h2>
+<div class="two">
+<div>
+<ol>
+<li>Click <b>New game</b> (top right).</li>
+<li><b>Folder.</b> Pick the folder of the game. An empty folder starts a new game.</li>
+<li><b>Files.</b> Drop your story or book, your art board, your map overview and your main character designs.</li>
+<li><b>Workflow quiz.</b> Answer 12 questions. The lead agent follows your answers when it decides for you.</li>
+<li><b>Start.</b> Click <b>Save and open the Studio</b>.</li>
+<li>Click <b>Launch team</b>. Each agent starts in its own terminal.</li>
+<li>Click <b>Send kickoff</b>. The lead agent reads your files and writes <code>GAME_DIRECTION.md</code> and 12 picture prompts.</li>
+<li>Click <b>Mockup</b>. Add your 12 pictures, read the game direction, then click <b>Approve the mockup</b> or <b>Ask for changes</b>.</li>
+</ol>
+</div>
+<figure><img src="quiz.jpg" alt="The workflow quiz with one question and three answers"><figcaption>The workflow quiz. Your answers go into the file WORKFLOW.md.</figcaption></figure>
+</div>
+<div class="note"><b>Pictures cost money.</b> Orbie Studio does not make the 12 mockup pictures. Make them with the prompts in <code>mockup/PROMPTS.md</code> and drop them on the Mockup screen.</div>
+</section>
+
+<section id="screens">
+<h2>5. The screens</h2>
+<table>
+<tr><th style="width:18%">Tab</th><th>What it shows</th></tr>
+<tr><td><b>Home</b></td><td>Your games, the agents, the open questions and the rocket of the open game.</td></tr>
+<tr><td><b>Studio</b></td><td>One card for each agent. A double-click on a card opens the big view with the live terminal.</td></tr>
+<tr><td><b>Previews</b></td><td>The newest answer and the views of each agent.</td></tr>
+<tr><td><b>Status</b></td><td>What each agent does now. Start, stop and open each agent.</td></tr>
+<tr><td><b>Usage</b></td><td>The rocket flight. The rocket passes one stop for each token goal, from Earth to the Andromeda Galaxy.</td></tr>
+<tr><td><b>Team</b></td><td>Planned: members, hours, questions to the team lead, shared prompts and the money pool.</td></tr>
+<tr><td><b>Questions</b></td><td>Every question and every approval from the agents. You can also write to one agent.</td></tr>
+</table>
+<div class="two">
+<figure><img src="home.jpg" alt="The Home screen with games, agents and the rocket strip"><figcaption>Home.</figcaption></figure>
+<figure><img src="usage.jpg" alt="The Usage screen with the rocket flight"><figcaption>Usage. The warning line is Saturn, at 1 billion tokens. Agents never pause at the line.</figcaption></figure>
+</div>
+</section>
+
+<section id="canvas">
+<h2>6. The Studio canvas</h2>
+<figure><img src="studio.jpg" alt="The Studio canvas with four agent cards, lines, a sticky note, a comment pin and the side panel"><figcaption>The Studio. Blue lines show who gives work. Dashed green lines show who checks the work.</figcaption></figure>
+<table>
+<tr><th style="width:24%">Action</th><th>How</th></tr>
+<tr><td><b>See one agent</b></td><td>Click its card. The side panel shows its status, its newest answers and a message box.</td></tr>
+<tr><td><b>Open the big view</b></td><td>Double-click a card. The live terminal fills the Studio. Click <b>Canvas</b> to go back.</td></tr>
+<tr><td><b>Move a card</b></td><td>Drag the card. It snaps to the grid.</td></tr>
+<tr><td><b>Connect two agents</b></td><td>Drag the ball on the right side of a card to another card. Click the line to choose "Gives work" or "Checks the work". Each agent learns the link at its next start.</td></tr>
+<tr><td><b>Comment</b></td><td>Click <b>Comment</b>, then click the canvas or a card. A comment on a card can go to that agent.</td></tr>
+<tr><td><b>Draw and notes</b></td><td>Click <b>Draw</b> to draw on the canvas. Click <b>Sticky note</b> to add a note.</td></tr>
+<tr><td><b>Change the layout</b></td><td>Click one of the five icons on the top right: Tree, Orbit, Lanes, Timeline or Flow.</td></tr>
+<tr><td><b>Change the theme</b></td><td>Click the moon button on the top right: Dusk, Daylight, Aurora or Midnight.</td></tr>
+</table>
+</section>
+
+<section id="safety">
+<h2>7. Safety rules</h2>
+<div class="note safe">
+<ul>
+<li><b>Publishing waits for you.</b> No agent publishes a game. You publish in Roblox Studio yourself.</li>
+<li><b>Spending money waits for you.</b> No agent buys anything.</li>
+<li><b>Agents ask first.</b> The usual mode is "Ask before acting". The mode "Skip all approvals" lets an agent do anything on the PC, so use it only for work that you can undo.</li>
+<li><b>Your files stay on your PC.</b> Only Claude Code sends data, to run the agents.</li>
+<li><b>Protect your accounts.</b> Turn on two-step login for <a href="https://github.com/settings/security">GitHub</a> and for Roblox.</li>
+</ul>
+</div>
+</section>
+
+<section id="help">
+<h2>8. Updates and help</h2>
+<ul>
+<li><b>Updates.</b> Orbie Studio checks GitHub every 10 minutes. Click <b>Restart to update</b> when the title bar offers a new version.</li>
+<li><b>Check now.</b> Open the main menu and click <b>Check for updates</b>.</li>
+<li><b>Shortcuts.</b> Press <b>F1</b>, or open the main menu and click <b>Shortcuts</b>.</li>
+<li><b>Open a game.</b> Press <b>Ctrl+O</b>.</li>
+<li><b>Claude Code help.</b> Read the <a href="https://code.claude.com/docs">Claude Code documentation</a>.</li>
+<li><b>Other questions.</b> Ask Cohesive, the team lead.</li>
+</ul>
+</section>
+
+<footer>Orbie Studio 1.0 · Quick guide · Back to the <a href="#setup">setup steps</a> · <a href="https://github.com/ki11phil0405-bit/agent-deck">Orbie Studio on GitHub</a></footer>
+
+</body>
+</html>

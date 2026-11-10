@@ -41,6 +41,12 @@
       "!**/*.map",
       "!**/*.pdb"
     ],
+    "extraFiles": [
+      {
+        "from": "src/docs/Orbie Studio Quick Guide.pdf",
+        "to": "Orbie Studio Quick Guide.pdf"
+      }
+    ],
     "asar": false,
     "npmRebuild": false,
     "nodeGypRebuild": false,

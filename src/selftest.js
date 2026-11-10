@@ -48,6 +48,7 @@ module.exports = {
     };
     fs.writeFileSync(path.join(agents, 'demo-game', 'team.json'), JSON.stringify(team, null, 2));
     settings.updateRepo = ''; // never reach the real GitHub during the self-test
+    settings.guideSeen = true; // no welcome window during the self-test
     settings.agentsRoot = agents;
     settings.openTabs = [proj];
     settings.recent = [{ path: proj, name: 'Demo Game', openedAt: Date.now() }];
@@ -546,7 +547,7 @@ module.exports = {
       log('reply button marked seen', (await js(`!document.querySelector('.tile .icon-btn.new')`)) === true);
       await js(`document.getElementById('main-menu').click()`); await sleep(300);
       const mm = await js(`document.querySelector('.menu').textContent`);
-      log('main menu has folders, remote and themes', /Switch this tab to another folder/.test(mm) && /Change agents folder/.test(mm) && /Remote view/.test(mm) && /Midnight/.test(mm) && !/Quick guide/.test(mm), mm.slice(0, 200));
+      log('main menu has folders, remote, themes and the quick guide', /Switch this tab to another folder/.test(mm) && /Change agents folder/.test(mm) && /Remote view/.test(mm) && /Midnight/.test(mm) && /Quick guide/.test(mm) && fs.existsSync(path.join(__dirname, 'docs', 'Orbie Studio Quick Guide.pdf')), mm.slice(0, 200));
       await shot('17_main_menu');
       await js(`closeMenu()`);
       await js(`document.querySelector('.toolbar .proj').click()`); await sleep(300);

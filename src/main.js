@@ -1557,6 +1557,16 @@ function saveWorkflow(key, o) {
   return true;
 }
 
+/* ------------------------------------------------------------------ quick guide */
+// The guide is a PDF inside the app. The window can ask to open this one file and nothing else.
+const QUICK_GUIDE = () => path.join(__dirname, 'docs', 'Orbie Studio Quick Guide.pdf');
+async function openGuide() {
+  if (!fs.existsSync(QUICK_GUIDE())) throw new Error('The quick guide is missing from this copy of Orbie Studio.');
+  const err = await shell.openPath(QUICK_GUIDE());
+  if (err) throw new Error('The quick guide could not open: ' + err);
+  return true;
+}
+
 /* ------------------------------------------------------------------ IPC */
 
 function handle(name, fn) {
@@ -1681,6 +1691,7 @@ function wireIpc() {
   handle('clipboard:read', () => clipboard.readText());
   handle('clipboard:write', (t) => { clipboard.writeText(String(t)); return true; });
   // The window may change only these settings. Where updates come from is never one of them.
+  handle('docs:guide', () => openGuide());
   handle('intake:list', (key) => intakeList(key));
   handle('intake:add', (key, slot, files) => intakeAdd(key, slot, files));
   handle('intake:pick', (key, slot) => intakePick(key, slot));
@@ -1688,6 +1699,7 @@ function wireIpc() {
   handle('settings:save', (patch) => {
     const ok = {};
     if (patch && typeof patch.theme === 'string' && Object.prototype.hasOwnProperty.call(THEME_BAR, patch.theme)) ok.theme = patch.theme;
+    if (patch && patch.guideSeen === true) ok.guideSeen = true;
     if (TESTING && patch) for (const k of ['updateFeedBase', 'updateSource']) if (typeof patch[k] === 'string') ok[k] = patch[k];
     Object.assign(settings, ok); saveSettings(); applyThemeBar();
     return settings;

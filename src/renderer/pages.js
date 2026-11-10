@@ -185,7 +185,7 @@ function pageHome(ws) {
     ws ? rocketStrip(ws) : needGame('Pick the folder of a game. Its agents start side by side, and the rocket flight begins.'),
     h('div', { class: 'cols3' }, games, agents, needs),
     h('footer', { class: 'pc' }, ok(!!info.claudePath, 'Claude Code'), ok(!!info.gitPath, 'Git'), ok(!!info.curlPath, 'Status lights'),
-      h('span', { class: 'chip', text: 'Orbie Studio ' + (info.version || '') }), h('span', { class: 'hint', text: 'Agents use your own Claude Code sign-in.' })),
+      h('span', { class: 'chip', text: 'Orbie Studio ' + (info.version || '') }), h('button', { class: 'chip link', text: 'Quick guide (PDF)', on: { click: () => safely(() => D.openGuide()) } }), h('span', { class: 'hint', text: 'Agents use your own Claude Code sign-in.' })),
   ];
 }
 

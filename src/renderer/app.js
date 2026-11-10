@@ -1384,6 +1384,7 @@ function mainMenu(anchor) {
     { head: 'Theme' },
     ...THEMES.map(t => ({ label: t.name, sub: t.id === curTheme() ? 'On now' : t.sub, run: () => setTheme(t.id) })),
     { sep: true },
+    { label: 'Quick guide (PDF)', sub: 'Setup, install and your first game', run: () => safely(() => D.openGuide()) },
     { label: 'Shortcuts', k: 'F1', run: helpModal },
     { label: 'Check for updates', sub: 'You have ' + (S.info ? S.info.version : ''), run: async () => { const u = await safely(() => D.checkUpdate()); if (u) { if (u.available) { showUpdate(u); updateModal(u); } else toast(`You have the newest version (${u.current}).`); } } },
   ]);
@@ -1613,7 +1614,7 @@ function helpModal() {
     ['Maximize a tile', 'Double-click its title'], ['Copy in a terminal', 'Select, then Ctrl+C or right-click'], ['Paste in a terminal', 'Ctrl+V or right-click'], ['Next project', 'Ctrl+Tab'], ['Close a dialog / restore', 'Esc']];
   modal({ title: 'Shortcuts', body: [h('div', { class: 'kbd' }, rows.flatMap(([a, k]) => [h('span', { text: a }), h('kbd', { text: k })])),
     h('p', { class: 'hint', text: `Orbie Studio ${S.info ? S.info.version : ''}. Created and published by ${(S.info && S.info.publisher) || 'Cohesive'}.` })],
-    actions: [{ label: 'Close' }] });
+    actions: [{ label: 'Open the quick guide (PDF)', left: true, onClick: () => { safely(() => D.openGuide()); } }, { label: 'Close' }] });
 }
 
 /* ------------------------------------------------------------------ keyboard */
@@ -1822,5 +1823,12 @@ function updateHelpModal(u) {
   }
   activate(S.tabs.length ? S.tabs[S.tabs.length - 1].key : null);
   S.booted = true;
+  // first start: offer the quick guide once
+  if (!S.info.settings.guideSeen) {
+    S.info.settings.guideSeen = true;
+    D.saveSettings({ guideSeen: true }).catch(() => {});
+    modal({ title: 'Welcome to Orbie Studio', body: [h('p', { class: 'hint', style: 'font-size:13px;color:var(--fg-2)', text: 'The quick guide explains the setup of your PC and your first game. It has links to every download. You can open it later from the main menu.' })],
+      actions: [{ label: 'Later' }, { label: 'Open the quick guide (PDF)', primary: true, onClick: () => { safely(() => D.openGuide()); } }] });
+  }
   for (const ws of S.tabs) if (!ws.team) { activate(ws.key); choosePreset(ws); break; }
 })();
