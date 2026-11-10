@@ -1,0 +1,200 @@
+{
+  "product": "orbie-studio",
+  "version": "1.0.0",
+  "ref": "0f7064a5f9b1d5ad2c31ce44b9aeda7493a5b440",
+  "published": "2026-11-10",
+  "publisher": "Cohesive",
+  "electron": "44.7.2",
+  "dependencies": {
+    "@lydell/node-pty": "1.2.0-beta.15",
+    "@xterm/xterm": "6.0.0",
+    "@xterm/addon-fit": "0.11.0",
+    "@xterm/addon-web-links": "0.12.0",
+    "marked": "18.1.1",
+    "dompurify": "3.4.17"
+  },
+  "notes": "- First version of Orbie Studio, your team's AI game studio. Orbie Studio grew out of Agent Deck.\n- New look: glass panels on a soft color backdrop, with four themes. Open the main menu and pick Dusk, Daylight, Aurora or Midnight.\n- A soft light follows the mouse behind the panels.\n- New tab bar: Home, Studio, Previews, Status, Usage, Team and Questions. The app starts on Home.\n- Home shows your games, the agents, the open questions and the rocket flight of the open game.\n- Studio is the board with the live agent terminals. Five icons on the top right arrange the board: Tree, Orbit, Lanes, Timeline and Flow.\n- Previews shows the newest answer and the views of each agent.\n- Status shows one card for each agent, with Start, Stop and Open console.\n- Usage shows the rocket flight: 19 stops from Earth to the Andromeda Galaxy, for the tokens of the whole life of a game. The warning line is Saturn (1 billion tokens).\n- Questions shows each question and each approval, and you can write to one agent.\n- Team shows the plan only. The Team features need a shared online database, which is not built yet.\n- Each agent has a picture. The logo wears a space helmet.\n- Orbie Studio installs next to Agent Deck and keeps its own settings. The first start copies your recent projects and your agents folder from Agent Deck.\n- Safer updates: Orbie Studio reads its own update list (update/orbie-studio.json) and refuses a list or a folder that belongs to another app.\n- Safer updates: Orbie Studio no longer searches other drives and cloud folders for an update folder. It uses GitHub, or a folder that you pick.\n- Safer window: the window can change the theme only. It cannot change where updates come from, and it cannot make the PC run a file.\n- Safer web tiles: an embedded page gets no camera, no microphone and no other permission, and its links open in your browser.\n- Safer local server: the server that agents use to talk ignores requests that come through another host name.\n- The text cleaner library (DOMPurify) is updated to 3.4.17, which fixes known faults.\n- Paired Remote view devices are not copied from Agent Deck. Pair each device again.",
+  "installer": "https://github.com/ki11phil0405-bit/agent-deck/releases/download/v1.0.0/Orbie-Studio-Setup-1.0.0.exe",
+  "files": [
+    {
+      "path": "src/main.js",
+      "sha256": "997f03d4dc9f81a7bd9966e065e32683467a6adb8bfac093f87ef2ca335d9ee1",
+      "size": 93684
+    },
+    {
+      "path": "src/preload.js",
+      "sha256": "d240f78f020e2a62a24216ea75c9b7dff48dbe53ff77721347d993925219b849",
+      "size": 3581
+    },
+    {
+      "path": "src/presets.js",
+      "sha256": "7a157ceec4da0d9109bad3d5ad43503cbc0f595620e33a937b75111e06701c4b",
+      "size": 14055
+    },
+    {
+      "path": "src/remote/index.html",
+      "sha256": "bf2e13d03491d52726ea6070f4c28f9f672d1755714d1c0294212bfcb663c92e",
+      "size": 6255
+    },
+    {
+      "path": "src/remote/remote.css",
+      "sha256": "fcbf775e3e341d0bb53c43e6176a975b5ff1b03e5d313ba7133a7126c7d66fc2",
+      "size": 12106
+    },
+    {
+      "path": "src/remote/remote.js",
+      "sha256": "cfa0a36572a6e7a23482241d6786bf91ed368a6da4276f1ace52c81049edc5d7",
+      "size": 29580
+    },
+    {
+      "path": "src/remote.js",
+      "sha256": "fa462af47780419175a49cd5774bcb563afd9d2d7a8a7133e8e26e04ea597d8d",
+      "size": 13245
+    },
+    {
+      "path": "src/renderer/app.css",
+      "sha256": "c369367d09a777170d7346f3c02bc596d3743fea2d58546d053701e367140dd1",
+      "size": 35204
+    },
+    {
+      "path": "src/renderer/app.js",
+      "sha256": "1a8d9f7c40f991f3a27148fe2dfa3949492e68780f6adeccc19f3bbf028e8854",
+      "size": 132085
+    },
+    {
+      "path": "src/renderer/av/art.svg",
+      "sha256": "6efaf6d7d635e73e393e4b65bb5f75760d08a8739605a8fc2083611628f7dacb",
+      "size": 1500
+    },
+    {
+      "path": "src/renderer/av/aud.svg",
+      "sha256": "baaa55cc960fa84b8ba7e69f6061d3609b26ff0687e0d1fc03629b13be46613b",
+      "size": 1544
+    },
+    {
+      "path": "src/renderer/av/com.svg",
+      "sha256": "dacae83d79f832a2de7a039f74f530ca4dc032bd5807017ae75d417b78eb398d",
+      "size": 1243
+    },
+    {
+      "path": "src/renderer/av/des.svg",
+      "sha256": "0f52cbbd711bd8a1418c735eb898ac4601f060a11089fc556394315b74cf9893",
+      "size": 1437
+    },
+    {
+      "path": "src/renderer/av/eng.svg",
+      "sha256": "92f2fcfc04349683663a18ed6835f683474ee803d40c9ecd2c527026c1d472e2",
+      "size": 1181
+    },
+    {
+      "path": "src/renderer/av/files.svg",
+      "sha256": "a9c87a672e632e92fa8be442e531b68481f849a3e535c3fb67be7a536a25a717",
+      "size": 1400
+    },
+    {
+      "path": "src/renderer/av/live.svg",
+      "sha256": "717beb8582f33c58e23d1d6be7196d20604b350fe49151f33df28d5ff4e4398c",
+      "size": 1572
+    },
+    {
+      "path": "src/renderer/av/miami.svg",
+      "sha256": "9e237e3f9f9c56f5e7c630a78efad56bf57e2c0c4295fa09e09d6e91f0123cfe",
+      "size": 752
+    },
+    {
+      "path": "src/renderer/av/mkt.svg",
+      "sha256": "4eab9b21fc8fee1f02f21310c5b213b4f0dbf183e48c3d69b5eb70b288bceb25",
+      "size": 1264
+    },
+    {
+      "path": "src/renderer/av/pour.svg",
+      "sha256": "6675065b11c1906da41058ef2dcbc681fcc26406afa77a153aa61514847a740b",
+      "size": 953
+    },
+    {
+      "path": "src/renderer/av/pr.svg",
+      "sha256": "04cb9fa6aceb35731c9d71fd7cd8c83ce46525f5a67f052b7d13ca4ecf3eea9b",
+      "size": 1364
+    },
+    {
+      "path": "src/renderer/av/prog.svg",
+      "sha256": "7a73c28080e030c59630d993fd1803bd11e79f06ecdea1ec208c38c624ac955d",
+      "size": 1171
+    },
+    {
+      "path": "src/renderer/av/punch.svg",
+      "sha256": "95d1e8a100e474ac5db9a91cb83d49579c4e7db82d7736a3e7a308eaa3e0d4d9",
+      "size": 747
+    },
+    {
+      "path": "src/renderer/av/qa.svg",
+      "sha256": "7a19c293e810edf7abf369f05d2006994e2f950c6161fc6f8402d9f4a2936710",
+      "size": 1165
+    },
+    {
+      "path": "src/renderer/av/sup.svg",
+      "sha256": "486d5e3a35664867595bb6c2008d5f5394885ef2beafffca43b41343540939b6",
+      "size": 1327
+    },
+    {
+      "path": "src/renderer/glass.css",
+      "sha256": "41abea052e84c775702b9382ba8471d4cae527decf5e6c5071a272c364ef1631",
+      "size": 7085
+    },
+    {
+      "path": "src/renderer/icon.png",
+      "sha256": "c5f1d6fe5ba3372d085c6a64ccb3c92a6dc1549cf9eab9d45fc73b1b9ff97745",
+      "size": 61389
+    },
+    {
+      "path": "src/renderer/index.html",
+      "sha256": "0dc3a6f034da3e54076764868c17b8f597221c7ce69096064b8ae4b5424a236d",
+      "size": 1513
+    },
+    {
+      "path": "src/renderer/logo.svg",
+      "sha256": "d075129e6d2ce371ce10539d0c7c0536efdb36bd76dfc565c784d5da76369e53",
+      "size": 4697
+    },
+    {
+      "path": "src/renderer/pages.css",
+      "sha256": "8ddfba456e4555f5b701971e0a2c4bf770ff9890deee07387c4d43d102f8b368",
+      "size": 12404
+    },
+    {
+      "path": "src/renderer/pages.js",
+      "sha256": "2ef3b8d41b37d242d2abf326ae2c78935e4c4aa318138451fe63b0df7295b58c",
+      "size": 27774
+    },
+    {
+      "path": "src/renderer/vendor/addon-fit.js",
+      "sha256": "ba3ea256ce0620a0992a197d6c9baea64823fc93d8da07a9e366ca9943c18527",
+      "size": 1521
+    },
+    {
+      "path": "src/renderer/vendor/addon-web-links.js",
+      "sha256": "b74864125ef3889753b94e61eb4dabb99b2a27f920f0c9a7bd53cbe6d10f032a",
+      "size": 3100
+    },
+    {
+      "path": "src/renderer/vendor/marked.umd.js",
+      "sha256": "b82b9334406d8bdd16b6236c08de1cb65b2a859873ca9503d9cc0b292ca3c12a",
+      "size": 47956
+    },
+    {
+      "path": "src/renderer/vendor/purify.min.js",
+      "sha256": "cd37898f9782adf54820c413191b5691803f0f137c799d6edcfd38523b4c2c31",
+      "size": 29828
+    },
+    {
+      "path": "src/renderer/vendor/xterm.css",
+      "sha256": "854a7c0fb70e8b1a083c16797ab827299fb18744f5ad34f227b48337e33293c6",
+      "size": 7112
+    },
+    {
+      "path": "src/renderer/vendor/xterm.js",
+      "sha256": "14903579ff54664cd72f8e8699e6961a6272c21863ec1c3b118cdc8af5d4a972",
+      "size": 488663
+    }
+  ]
+}
