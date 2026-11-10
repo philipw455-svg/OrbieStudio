@@ -244,6 +244,7 @@ function buildWsDom(ws) {
   ws.feedEl = h('ul', { class: 'feed' });
   ws.repliesEl = h('div', { class: 'replies' });
   const tb = h('div', { class: 'toolbar' },
+    h('button', { class: 'btn', title: 'Back to the agent cards', text: '← Canvas', on: { click: () => studioView('canvas') } }),
     h('button', { class: 'proj', title: 'Folder menu: switch folder, open in Explorer, recent projects', on: { click: (e) => menu(e.currentTarget, folderItems(ws)) } }, h('b', null, ws.name, h('span', { class: 'caret', text: ' ▾' })), h('span', { class: 'pp', text: ws.path })),
     h('button', { class: 'btn primary', title: 'Start the agents (Ctrl+Shift+L)', on: { click: () => launchTeam(ws) } }, 'Launch team'),
     h('button', { class: 'btn', title: 'Move a task to another agent (Ctrl+Shift+H)', text: 'Hand off', on: { click: () => handoffModal(ws) } }),
@@ -1669,7 +1670,7 @@ D.on('console:status', (c) => {
   renderMap(ws);
   drawLinks(ws);
 });
-D.on('console:focus', ({ id }) => { if (!id) return; const [key, ...rest] = id.split(':'); const ws = wsByKey(key); if (ws) focusConsole(ws, rest.join(':')); });
+D.on('console:focus', ({ id }) => { if (!id) return; const [key, ...rest] = id.split(':'); const ws = wsByKey(key); if (ws) { if (typeof openBig === 'function' && !(S.page === 'studio' && S.studioView === 'board')) openBig(ws, rest.join(':')); else focusConsole(ws, rest.join(':')); } });
 D.on('feed:add', ({ key, item }) => { const ws = wsByKey(key); if (!ws) return; ws.feed.push(item); if (ws.feed.length > 300) ws.feed.splice(0, ws.feed.length - 300); renderFeed(ws); });
 D.on('inbox:update', ({ key, inbox }) => {
   const ws = wsByKey(key); if (!ws) return;

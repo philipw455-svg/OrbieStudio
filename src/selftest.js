@@ -62,8 +62,17 @@ module.exports = {
       await sleep(2500);
       log('the app starts on Home', (await js(`S.page`)) === 'home' && (await js(`document.getElementById('page').hidden`)) === false && (await js(`document.querySelectorAll('#navbar .ptabs button').length`)) === 7);
       await sleep(1200); await shot('00_home');
-      await js(`goPage('studio')`); await sleep(500);
-      log('the Studio tab shows the board', (await js(`S.tabs[0].el.hidden`)) === false && (await js(`document.getElementById('page').hidden`)) === true);
+      await js(`goPage('studio')`); await sleep(700);
+      log('the Studio tab shows one card for each agent', (await js(`document.querySelectorAll('#page .cv .node').length`)) === 4 && (await js(`document.querySelectorAll('#page .cv .node .av img').length`)) === 4 && (await js(`S.tabs[0].el.hidden`)) === true);
+      log('the side panel shows the selected agent', (await js(`document.querySelector('#page .inspector h2').textContent`)) === 'Supervisor');
+      await shot('00_studio_canvas');
+      await js(`document.querySelector('#page .cv .node[data-id="studio"]').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))`); await sleep(600);
+      log('a double-click opens the big view of that agent', (await js(`S.studioView`)) === 'board' && (await js(`S.tabs[0].el.hidden`)) === false && (await js(`!!document.querySelector('.tile.max')`)) === true && (await js(`document.querySelector('.tile.max .t-name').textContent`)) === 'Studio builder');
+      await shot('00_big_view');
+      await js(`studioView('canvas')`); await sleep(300);
+      log('the Canvas button goes back to the cards', (await js(`document.querySelectorAll('#page .cv .node').length`)) === 4 && (await js(`document.querySelectorAll('.tile.max').length`)) === 0);
+      await js(`studioView('board')`); await sleep(500);
+      log('the big view shows the board', (await js(`S.tabs[0].el.hidden`)) === false && (await js(`document.getElementById('page').hidden`)) === true);
       log('project tab opened', (await js(`document.querySelectorAll('.tab').length`)) === 1);
       log('4 console tiles', (await js(`document.querySelectorAll('.tile .term').length`)) === 4);
       await shot('01_board');
@@ -335,7 +344,15 @@ module.exports = {
       log('Status shows one card for each agent with a picture', (await js(`document.querySelectorAll('#page .agent-card .av img').length`)) === 4);
       await js(`goPage('usage')`); await sleep(1600);
       log('Usage shows the 19 stops and the rocket', (await js(`document.querySelectorAll('#page .stop').length`)) === 19 && (await js(`document.querySelectorAll('#page .track .rocket').length`)) === 1);
-      await js(`goPage('studio')`); await sleep(400);
+      await js(`studioView('canvas')`); await sleep(600);
+      const cmodes = [];
+      for (const m of ['tree', 'orbit', 'lanes', 'timeline', 'flow']) { await js(`document.querySelector('#navbar .lays button[aria-label="${m[0].toUpperCase() + m.slice(1)} layout"]').click()`); await sleep(500); cmodes.push(await js(`S.tabs[0].board.canvas.mode`)); await shot('32_canvas_' + m); }
+      log('the five layouts arrange the cards', cmodes.join(',') === 'tree,orbit,lanes,timeline,flow' && (await js(`document.querySelectorAll('#page .cv .edge.give').length`)) === 3, cmodes.join(','));
+      await js(`addSticky(S.tabs[0])`); await sleep(300);
+      await js(`(()=>{const ta=document.querySelector('#page .sticky textarea');ta.value='Check the lamps';ta.dispatchEvent(new Event('input'));})()`); await sleep(1500);
+      log('a sticky note is saved with the game', JSON.parse(fs.readFileSync(path.join(p.agentsDir, 'board.json'), 'utf8')).canvas.notes[0].text === 'Check the lamps');
+      await shot('33_canvas_note');
+      await js(`studioView('board')`); await sleep(500);
       const modes = [];
       for (const m of ['orbit', 'lanes', 'timeline', 'flow', 'tree']) { await js(`document.querySelector('#navbar .lays button[aria-label="${m[0].toUpperCase() + m.slice(1)} layout"]').click()`); await sleep(500); modes.push(await js(`S.tabs[0].board.mode`)); if (m !== 'tree') await shot('31_layout_' + m); }
       log('the five layouts arrange the board', modes.join(',') === 'orbit,lanes,timeline,flow,tree', modes.join(','));

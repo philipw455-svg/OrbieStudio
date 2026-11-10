@@ -63,7 +63,7 @@ function renderNav() {
   const right = h('div', { class: 'pright' });
   if (S.page === 'studio' && ws && ws.team) {
     right.append(h('nav', { class: 'lays glassbar', 'aria-label': 'Studio layout' }, LAYOUTS.map(([id, name, ic]) =>
-      h('button', { class: ws.board && ws.board.mode === id ? 'on' : '', title: `${name} layout`, 'aria-label': `${name} layout`, html: ic, on: { click: () => { arrange(ws, id); renderNav(); } } }))));
+      h('button', { class: curLayout(ws) === id ? 'on' : '', title: `${name} layout`, 'aria-label': `${name} layout`, html: ic, on: { click: () => setLayout(ws, id) } }))));
   } else {
     right.append(h('button', { class: 'btn primary big', title: 'Pick a folder for the game', text: 'New game', on: { click: openProjectFlow } }));
   }
@@ -79,12 +79,13 @@ function goPage(id) {
 }
 function paintPage() {
   const ws = activeWs();
-  const studio = S.page === 'studio' && !!ws;
-  for (const w of S.tabs) w.el.hidden = !(studio && w.key === S.active);
+  // the Studio has two views: the canvas with the agent cards, and the big view (the board with the live terminals)
+  const board = S.page === 'studio' && !!ws && !!ws.team && S.studioView === 'board';
+  for (const w of S.tabs) w.el.hidden = !(board && w.key === S.active);
   const wel = document.getElementById('welcome'); if (wel) wel.hidden = true;
-  pageEl.hidden = studio;
+  pageEl.hidden = board;
   renderNav();
-  if (studio) { positionTiles(ws); refitAll(ws); return; }
+  if (board) { positionTiles(ws); refitAll(ws); return; }
   drawPage();
 }
 let dirtyTimer = null;
@@ -93,6 +94,7 @@ function pageDirty() {
   dirtyTimer = setTimeout(() => {
     renderNav();
     if (pageEl.hidden || S.page === 'usage') return;
+    if (S.page === 'studio') { const w = activeWs(); if (w && w.team && typeof refreshCanvas === 'function') refreshCanvas(w); return; }
     const f = document.activeElement;
     if (f && pageEl.contains(f) && /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName)) return pageDirty(); // never wipe text the owner is typing
     drawPage();
@@ -105,7 +107,7 @@ function needGame(what) {
 }
 function drawPage() {
   const ws = activeWs();
-  const P = { home: pageHome, studio: () => [head('Studio', 'The board with the live agent terminals.'), needGame('The Studio shows the agents of the open game.')], previews: pagePreviews, status: pageStatus, usage: pageUsage, team: pageTeam, questions: pageQuestions }[S.page] || pageHome;
+  const P = { home: pageHome, studio: pageStudio, previews: pagePreviews, status: pageStatus, usage: pageUsage, team: pageTeam, questions: pageQuestions }[S.page] || pageHome;
   pageEl.className = 'screen page p-' + S.page;
   put(pageEl, h('div', { class: 'page-in' }, P(ws)));
 }
@@ -169,7 +171,7 @@ function pageHome(ws) {
         h('span', { class: 'gr-t' }, h('b', { text: r.name }), h('span', { text: r.path })), h('span', { class: 'chip', text: open ? (open.key === S.active ? 'Open now' : 'Open') : 'Recent' }));
     })) : h('p', { class: 'empty-note', text: 'No games yet. Press New game and pick a folder.' }));
   const agents = h('section', { class: 'gcard' }, h('div', { class: 'gc-head' }, h('h2', { text: 'Agents' }), ws && ws.team ? h('button', { class: 'btn sm', text: 'Status', on: { click: () => goPage('status') } }) : null),
-    ws && ws.team ? h('div', { class: 'arow' }, ws.team.agents.map(a => h('button', { class: 'acard', title: a.role || a.name, on: { click: () => { goPage('studio'); focusConsole(ws, a.id); } } }, avatar(a, ws, 56), h('b', { text: a.name }), statusPill(statusOf(ws, a.id)))))
+    ws && ws.team ? h('div', { class: 'arow' }, ws.team.agents.map(a => h('button', { class: 'acard', title: a.role || a.name, on: { click: () => openBig(ws, a.id) } }, avatar(a, ws, 56), h('b', { text: a.name }), statusPill(statusOf(ws, a.id)))))
       : h('p', { class: 'empty-note', text: ws ? 'This game has no team yet. Open the Studio and pick a team.' : 'Open a game to see its agents.' }));
   const n = needsCount();
   const first = ws && ws.inbox.length ? ws.inbox[ws.inbox.length - 1] : null;
@@ -179,7 +181,7 @@ function pageHome(ws) {
   const ok = (good, text) => h('span', { class: 'chip ' + (good ? 'ok' : 'warn'), text: (good ? '✓ ' : '! ') + text });
   return [
     h('header', { class: 'hero' }, h('img', { src: 'logo.svg', alt: '' }), h('div', null, h('h1', { text: 'Orbie Studio' }), h('p', { class: 'tagline', text: 'Your team\'s AI game studio' })),
-      h('div', { class: 'pacts' }, ws ? h('button', { class: 'btn big', text: 'Open the Studio', on: { click: () => goPage('studio') } }) : null, h('button', { class: 'btn big' + (ws ? '' : ' primary'), text: 'Open project folder', on: { click: openProjectFlow } }))),
+      h('div', { class: 'pacts' }, ws ? h('button', { class: 'btn big', text: 'Open the Studio', on: { click: () => studioView('canvas') } }) : null, h('button', { class: 'btn big' + (ws ? '' : ' primary'), text: 'Open project folder', on: { click: openProjectFlow } }))),
     ws ? rocketStrip(ws) : needGame('Pick the folder of a game. Its agents start side by side, and the rocket flight begins.'),
     h('div', { class: 'cols3' }, games, agents, needs),
     h('footer', { class: 'pc' }, ok(!!info.claudePath, 'Claude Code'), ok(!!info.gitPath, 'Git'), ok(!!info.curlPath, 'Status lights'),
@@ -203,7 +205,7 @@ function pageStatus(ws) {
         h('div', { class: 'ac-top' }, avatar(a, ws, 64), h('div', { class: 'ac-t' }, h('h2', { text: a.name }), h('p', { text: a.role || '' })), statusPill(st)),
         h('p', { class: 'ac-note', text: agentNote(ws, a) }),
         h('div', { class: 'ac-meta' }, a.command && a.command !== 'claude' ? h('span', { class: 'chip', text: 'Runs: ' + a.command }) : h('span', { class: 'chip', text: 'Model: ' + model }), mode ? h('span', { class: 'chip' + (a.permissionMode === 'bypassPermissions' ? ' warn' : ''), text: mode }) : null, h('span', { class: 'chip', text: 'Own context and brain' })),
-        h('div', { class: 'ac-acts' }, h('button', { class: 'btn', text: 'Open console', on: { click: () => { goPage('studio'); focusConsole(ws, a.id); } } }),
+        h('div', { class: 'ac-acts' }, h('button', { class: 'btn', text: 'Open console', on: { click: () => openBig(ws, a.id) } }),
           on ? h('button', { class: 'btn', text: 'Stop', on: { click: () => stopAgent(ws, a.id) } }) : h('button', { class: 'btn primary', text: 'Start', on: { click: () => startAgent(ws, a.id, { resume: true }) } }),
           h('button', { class: 'btn ghost', text: 'Replies', on: { click: () => repliesModal(ws, a.id) } })));
     })),
@@ -227,9 +229,9 @@ function pagePreviews(ws) {
       return h('section', { class: 'gcard pv' },
         h('div', { class: 'ac-top' }, avatar(a, ws, 44), h('div', { class: 'ac-t' }, h('h2', { text: a.name }), h('p', { text: r ? 'Answered at ' + hhmm(r.at) : 'No answer yet' })), statusPill(statusOf(ws, a.id))),
         r ? md : h('p', { class: 'empty-note', text: 'When this agent finishes a turn, its answer shows here.' }),
-        mine.length ? h('div', { class: 'ac-meta' }, mine.map(v => h('button', { class: 'chip link', text: 'View: ' + (v.title || v.path || v.type), on: { click: () => { goPage('studio'); setFocus(ws, v); fitAll(ws, true); } } }))) : null,
+        mine.length ? h('div', { class: 'ac-meta' }, mine.map(v => h('button', { class: 'chip link', text: 'View: ' + (v.title || v.path || v.type), on: { click: () => { studioView('board'); setFocus(ws, v); fitAll(ws, true); } } }))) : null,
         h('div', { class: 'ac-acts' }, r ? h('button', { class: 'btn', text: 'Open all answers', on: { click: () => repliesModal(ws, a.id) } }) : null,
-          h('button', { class: 'btn ghost', text: 'Open console', on: { click: () => { goPage('studio'); focusConsole(ws, a.id); } } })));
+          h('button', { class: 'btn ghost', text: 'Open console', on: { click: () => openBig(ws, a.id) } })));
     })),
   ];
 }
@@ -283,7 +285,7 @@ function pageQuestions(ws) {
       h('p', { class: 'qtext', text: it.text }),
       perm ? null : (it.options && it.options.length ? h('div', { class: 'qopts' }, it.options.map((o, i) => h('button', { class: 'opt', on: { click: () => answer(o) } }, h('span', { class: 'key', text: 'ABCDEFGH'[i] || '•' }), o))) : null),
       perm ? null : h('form', { class: 'qform', on: { submit: (e) => { e.preventDefault(); answer(input.value); } } }, input, h('button', { class: 'btn primary', text: 'Send' })),
-      h('div', { class: 'ac-acts' }, h('button', { class: 'btn' + (perm ? ' primary' : ''), text: 'Open console', on: { click: () => { goPage('studio'); focusConsole(ws, agentId); } } }), h('button', { class: 'btn ghost', text: 'Dismiss', on: { click: () => D.dismiss(ws.key, it.id) } })));
+      h('div', { class: 'ac-acts' }, h('button', { class: 'btn' + (perm ? ' primary' : ''), text: 'Open console', on: { click: () => openBig(ws, agentId) } }), h('button', { class: 'btn ghost', text: 'Dismiss', on: { click: () => D.dismiss(ws.key, it.id) } })));
   }) : [h('section', { class: 'gcard empty' }, h('h2', { text: 'Nothing waits for you' }), h('p', { text: 'Agents put questions and approvals here. You can also write to an agent on the right.' }))];
   // write to one agent
   const to = h('select', { class: 'select', 'aria-label': 'Agent' }, (ws.team ? ws.team.agents : []).map(a => h('option', { value: a.id, text: a.name + (running(ws, a.id) ? '' : ' (not running)') })));

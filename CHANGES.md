@@ -6,7 +6,9 @@
 - A soft light follows the mouse behind the panels.
 - New tab bar: Home, Studio, Previews, Status, Usage, Team and Questions. The app starts on Home.
 - Home shows your games, the agents, the open questions and the rocket flight of the open game.
-- Studio is the board with the live agent terminals. Five icons on the top right arrange the board: Tree, Orbit, Lanes, Timeline and Flow.
+- Studio is a canvas with one card for each agent. Lines show who gives work and who checks it. You can drag a card, and it snaps to the grid.
+- Click a card to see the agent in the side panel, with its newest answers and a message box. Double-click a card to open the big view with its live terminal.
+- Five icons on the top right arrange the cards: Tree, Orbit, Lanes, Timeline and Flow. Sticky notes stay on the canvas.
 - Previews shows the newest answer and the views of each agent.
 - Status shows one card for each agent, with Start, Stop and Open console.
 - Usage shows the rocket flight: 19 stops from Earth to the Andromeda Galaxy, for the tokens of the whole life of a game. The warning line is Saturn (1 billion tokens).
