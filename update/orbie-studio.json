@@ -1,7 +1,7 @@
 {
   "product": "orbie-studio",
   "version": "1.0.0",
-  "ref": "f3a8e9065032511d423896d8a7e1017d956686fc",
+  "ref": "36193d7910fe300ab2bf6df3780b89e4f3c6ceb6",
   "published": "2026-11-10",
   "publisher": "Cohesive",
   "electron": "44.7.2",
@@ -15,16 +15,17 @@
   },
   "notes": "- First version of Orbie Studio, your team's AI game studio. Orbie Studio grew out of Agent Deck.\n- New look: glass panels on a soft color backdrop, with four themes. Open the main menu and pick Dusk, Daylight, Aurora or Midnight.\n- A soft light follows the mouse behind the panels.\n- New tab bar: Home, Studio, Previews, Status, Usage, Team and Questions. The app starts on Home.\n- Home shows your games, the agents, the open questions and the rocket flight of the open game.\n- Studio is a canvas with one card for each agent. Lines show who gives work and who checks it. You can drag a card, and it snaps to the grid.\n- Click a card to see the agent in the side panel, with its newest answers and a message box. Double-click a card to open the big view with its live terminal.\n- Five icons on the top right arrange the cards: Tree, Orbit, Lanes, Timeline and Flow. Sticky notes stay on the canvas.\n- Connect ball: drag the ball on a card to another card to link two agents. Click the line to pick \"Gives work\" or \"Checks the work\". Each agent gets the link as a rule at its next start.\n- Comment pins: pin a comment on the canvas or on a card. A pin on a card can send its text to that agent.\n- Drawing: draw on the canvas. \"Clear drawing\" removes every drawing.\n- New game: four steps. Pick the folder, drop your story, art board, map and character files, answer the workflow quiz, then start. Orbie Studio writes WORKFLOW.md and prepares a kickoff message for the lead agent.\n- Mockup approval: 12 places for pictures next to GAME_DIRECTION.md, with Approve and Ask for changes. Orbie Studio does not make the pictures itself.\n- Previews shows the newest answer and the views of each agent.\n- Status shows one card for each agent, with Start, Stop and Open console.\n- Usage shows the rocket flight: 19 stops from Earth to the Andromeda Galaxy, for the tokens of the whole life of a game. The warning line is Saturn (1 billion tokens).\n- Questions shows each question and each approval, and you can write to one agent.\n- Team shows the plan only. The Team features need a shared online database, which is not built yet.\n- Each agent has a picture. The logo wears a space helmet.\n- Quick guide: a new PDF explains the setup of the PC, the install and the first game, with links to every download. The first start offers it, and the main menu opens it. The installer also puts it in the install folder.\n- Orbie Studio installs next to Agent Deck and keeps its own settings. The first start copies your recent projects and your agents folder from Agent Deck.\n- Safer updates: Orbie Studio reads its own update list (update/orbie-studio.json) and refuses a list or a folder that belongs to another app.\n- Safer updates: Orbie Studio no longer searches other drives and cloud folders for an update folder. It uses GitHub, or a folder that you pick.\n- Safer window: the window can change the theme only. It cannot change where updates come from, and it cannot make the PC run a file.\n- Safer web tiles: an embedded page gets no camera, no microphone and no other permission, and its links open in your browser.\n- Safer local server: the server that agents use to talk ignores requests that come through another host name.\n- The text cleaner library (DOMPurify) is updated to 3.4.17, which fixes known faults.\n- Paired Remote view devices are not copied from Agent Deck. Pair each device again.",
   "installer": "https://github.com/ki11phil0405-bit/agent-deck/releases/download/v1.0.0/Orbie-Studio-Setup-1.0.0.exe",
+  "installerSha256": "4f50bc7659cf00e9a104c3e944755fc5ef9d3aec2e71e77d167094ce7825886a",
   "files": [
     {
-      "path": "src/docs/Orbie Studio Quick Guide.pdf",
+      "path": "src/guide/Orbie Studio Quick Guide.pdf",
       "sha256": "8c3256d07d4a230b20226ef8335af4d8ae07d12fcad4fa21a186115b3d967b5f",
       "size": 554016
     },
     {
       "path": "src/main.js",
-      "sha256": "3be4e3ac5922b54e2db421c6e187f7de0eae3bedf66f2b659b536a185be89b20",
-      "size": 99813
+      "sha256": "9c41cb9ad986d4bf1c4b6924887222d2293e6a6bbfd777ece97a1f7a1858f822",
+      "size": 100053
     },
     {
       "path": "src/preload.js",
