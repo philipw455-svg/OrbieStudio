@@ -547,7 +547,7 @@ module.exports = {
       log('reply button marked seen', (await js(`!document.querySelector('.tile .icon-btn.new')`)) === true);
       await js(`document.getElementById('main-menu').click()`); await sleep(300);
       const mm = await js(`document.querySelector('.menu').textContent`);
-      log('main menu has folders, remote, themes and the quick guide', /Switch this tab to another folder/.test(mm) && /Change agents folder/.test(mm) && /Remote view/.test(mm) && /Midnight/.test(mm) && /Quick guide/.test(mm) && fs.existsSync(path.join(__dirname, 'docs', 'Orbie Studio Quick Guide.pdf')), mm.slice(0, 200));
+      log('main menu has folders, remote, themes and the quick guide', /Switch this tab to another folder/.test(mm) && /Change agents folder/.test(mm) && /Remote view/.test(mm) && /Midnight/.test(mm) && /Quick guide/.test(mm) && fs.existsSync(path.join(__dirname, 'guide', 'Orbie Studio Quick Guide.pdf')), mm.slice(0, 200));
       await shot('17_main_menu');
       await js(`closeMenu()`);
       await js(`document.querySelector('.toolbar .proj').click()`); await sleep(300);

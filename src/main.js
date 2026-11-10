@@ -1558,11 +1558,17 @@ function saveWorkflow(key, o) {
 }
 
 /* ------------------------------------------------------------------ quick guide */
-// The guide is a PDF inside the app. The window can ask to open this one file and nothing else.
-const QUICK_GUIDE = () => path.join(__dirname, 'docs', 'Orbie Studio Quick Guide.pdf');
+// The guide is a PDF. A copy from source keeps it in src/guide. The installer puts it next to the app.
+// The window can ask to open this one file and nothing else.
+const GUIDE_NAME = 'Orbie Studio Quick Guide.pdf';
+function guidePath() {
+  for (const f of [path.join(__dirname, 'guide', GUIDE_NAME), path.join(path.dirname(app.getPath('exe')), GUIDE_NAME)]) { try { if (fs.statSync(f).isFile()) return f; } catch (e) {} }
+  return '';
+}
 async function openGuide() {
-  if (!fs.existsSync(QUICK_GUIDE())) throw new Error('The quick guide is missing from this copy of Orbie Studio.');
-  const err = await shell.openPath(QUICK_GUIDE());
+  const f = guidePath();
+  if (!f) throw new Error('The quick guide is missing from this copy of Orbie Studio.');
+  const err = await shell.openPath(f);
   if (err) throw new Error('The quick guide could not open: ' + err);
   return true;
 }

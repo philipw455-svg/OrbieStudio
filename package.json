@@ -43,7 +43,7 @@
     ],
     "extraFiles": [
       {
-        "from": "src/docs/Orbie Studio Quick Guide.pdf",
+        "from": "src/guide/Orbie Studio Quick Guide.pdf",
         "to": "Orbie Studio Quick Guide.pdf"
       }
     ],

@@ -3,7 +3,7 @@
 import pathlib
 from playwright.sync_api import sync_playwright
 here = pathlib.Path(__file__).resolve().parent
-out = here.parent.parent / 'src' / 'docs' / 'Orbie Studio Quick Guide.pdf'
+out = here.parent.parent / 'src' / 'guide' / 'Orbie Studio Quick Guide.pdf'
 out.parent.mkdir(parents=True, exist_ok=True)
 with sync_playwright() as p:
     b = p.chromium.launch()

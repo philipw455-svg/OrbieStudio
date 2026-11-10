@@ -7,7 +7,7 @@
 <p align="center">
   <a href="https://github.com/ki11phil0405-bit/agent-deck/releases/latest"><b>Download the installer</b></a>
   &nbsp;·&nbsp;
-  <a href="src/docs/Orbie%20Studio%20Quick%20Guide.pdf"><b>Quick guide (PDF)</b></a>
+  <a href="src/guide/Orbie%20Studio%20Quick%20Guide.pdf"><b>Quick guide (PDF)</b></a>
   &nbsp;·&nbsp;
   <a href="CHANGES.md"><b>What is new</b></a>
 </p>
@@ -136,7 +136,7 @@ Every copy checks `update/orbie-studio.json` on this repo's `main` branch every 
 1. Change the code, add a `## x.y.z` section at the top of `CHANGES.md`, and set `version` in `package.json`.
 2. `npm ci` then `npm run dist` (builds `dist/Orbie-Studio-Setup-x.y.z.exe`).
 3. Commit the code, then `npm run release` (writes `update/orbie-studio.json`, pointing at that commit), commit it too, and push `main`.
-4. On GitHub, Releases > Draft a new release: tag `vx.y.z` (create it on publish), title `Orbie Studio x.y.z`, attach `dist/Orbie-Studio-Setup-x.y.z.exe` and `src/docs/Orbie Studio Quick Guide.pdf`, Publish.
+4. On GitHub, Releases > Draft a new release: tag `vx.y.z` (create it on publish), title `Orbie Studio x.y.z`, attach `dist/Orbie-Studio-Setup-x.y.z.exe` and `src/guide/Orbie Studio Quick Guide.pdf`, Publish.
 
 Copies pick it up within 10 minutes.
 
