@@ -1,7 +1,7 @@
 {
   "product": "orbie-studio",
   "version": "1.0.0",
-  "ref": "909bad502dc4775e9952a9167e00f86555e98ece",
+  "ref": "00b2e16c493bf3fdd537705379c8bf3212ce24ab",
   "published": "2026-11-10",
   "publisher": "Cohesive",
   "electron": "44.7.2",
@@ -13,18 +13,18 @@
     "marked": "18.1.1",
     "dompurify": "3.4.17"
   },
-  "notes": "- First version of Orbie Studio, your team's AI game studio. Orbie Studio grew out of Agent Deck.\n- New look: glass panels on a soft color backdrop, with four themes. Open the main menu and pick Dusk, Daylight, Aurora or Midnight.\n- A soft light follows the mouse behind the panels.\n- New tab bar: Home, Studio, Previews, Status, Usage, Team and Questions. The app starts on Home.\n- Home shows your games, the agents, the open questions and the rocket flight of the open game.\n- Studio is a canvas with one card for each agent. Lines show who gives work and who checks it. You can drag a card, and it snaps to the grid.\n- Click a card to see the agent in the side panel, with its newest answers and a message box. Double-click a card to open the big view with its live terminal.\n- Five icons on the top right arrange the cards: Tree, Orbit, Lanes, Timeline and Flow. Sticky notes stay on the canvas.\n- Previews shows the newest answer and the views of each agent.\n- Status shows one card for each agent, with Start, Stop and Open console.\n- Usage shows the rocket flight: 19 stops from Earth to the Andromeda Galaxy, for the tokens of the whole life of a game. The warning line is Saturn (1 billion tokens).\n- Questions shows each question and each approval, and you can write to one agent.\n- Team shows the plan only. The Team features need a shared online database, which is not built yet.\n- Each agent has a picture. The logo wears a space helmet.\n- Orbie Studio installs next to Agent Deck and keeps its own settings. The first start copies your recent projects and your agents folder from Agent Deck.\n- Safer updates: Orbie Studio reads its own update list (update/orbie-studio.json) and refuses a list or a folder that belongs to another app.\n- Safer updates: Orbie Studio no longer searches other drives and cloud folders for an update folder. It uses GitHub, or a folder that you pick.\n- Safer window: the window can change the theme only. It cannot change where updates come from, and it cannot make the PC run a file.\n- Safer web tiles: an embedded page gets no camera, no microphone and no other permission, and its links open in your browser.\n- Safer local server: the server that agents use to talk ignores requests that come through another host name.\n- The text cleaner library (DOMPurify) is updated to 3.4.17, which fixes known faults.\n- Paired Remote view devices are not copied from Agent Deck. Pair each device again.",
+  "notes": "- First version of Orbie Studio, your team's AI game studio. Orbie Studio grew out of Agent Deck.\n- New look: glass panels on a soft color backdrop, with four themes. Open the main menu and pick Dusk, Daylight, Aurora or Midnight.\n- A soft light follows the mouse behind the panels.\n- New tab bar: Home, Studio, Previews, Status, Usage, Team and Questions. The app starts on Home.\n- Home shows your games, the agents, the open questions and the rocket flight of the open game.\n- Studio is a canvas with one card for each agent. Lines show who gives work and who checks it. You can drag a card, and it snaps to the grid.\n- Click a card to see the agent in the side panel, with its newest answers and a message box. Double-click a card to open the big view with its live terminal.\n- Five icons on the top right arrange the cards: Tree, Orbit, Lanes, Timeline and Flow. Sticky notes stay on the canvas.\n- Connect ball: drag the ball on a card to another card to link two agents. Click the line to pick \"Gives work\" or \"Checks the work\". Each agent gets the link as a rule at its next start.\n- Comment pins: pin a comment on the canvas or on a card. A pin on a card can send its text to that agent.\n- Drawing: draw on the canvas. \"Clear drawing\" removes every drawing.\n- New game: four steps. Pick the folder, drop your story, art board, map and character files, answer the workflow quiz, then start. Orbie Studio writes WORKFLOW.md and prepares a kickoff message for the lead agent.\n- Mockup approval: 12 places for pictures next to GAME_DIRECTION.md, with Approve and Ask for changes. Orbie Studio does not make the pictures itself.\n- Previews shows the newest answer and the views of each agent.\n- Status shows one card for each agent, with Start, Stop and Open console.\n- Usage shows the rocket flight: 19 stops from Earth to the Andromeda Galaxy, for the tokens of the whole life of a game. The warning line is Saturn (1 billion tokens).\n- Questions shows each question and each approval, and you can write to one agent.\n- Team shows the plan only. The Team features need a shared online database, which is not built yet.\n- Each agent has a picture. The logo wears a space helmet.\n- Orbie Studio installs next to Agent Deck and keeps its own settings. The first start copies your recent projects and your agents folder from Agent Deck.\n- Safer updates: Orbie Studio reads its own update list (update/orbie-studio.json) and refuses a list or a folder that belongs to another app.\n- Safer updates: Orbie Studio no longer searches other drives and cloud folders for an update folder. It uses GitHub, or a folder that you pick.\n- Safer window: the window can change the theme only. It cannot change where updates come from, and it cannot make the PC run a file.\n- Safer web tiles: an embedded page gets no camera, no microphone and no other permission, and its links open in your browser.\n- Safer local server: the server that agents use to talk ignores requests that come through another host name.\n- The text cleaner library (DOMPurify) is updated to 3.4.17, which fixes known faults.\n- Paired Remote view devices are not copied from Agent Deck. Pair each device again.",
   "installer": "https://github.com/ki11phil0405-bit/agent-deck/releases/download/v1.0.0/Orbie-Studio-Setup-1.0.0.exe",
   "files": [
     {
       "path": "src/main.js",
-      "sha256": "997f03d4dc9f81a7bd9966e065e32683467a6adb8bfac093f87ef2ca335d9ee1",
-      "size": 93684
+      "sha256": "9b48acbe73fd4c6d0294a9eea1eccf4b83eb61787c9edb799eae8b6de8689024",
+      "size": 99152
     },
     {
       "path": "src/preload.js",
-      "sha256": "d240f78f020e2a62a24216ea75c9b7dff48dbe53ff77721347d993925219b849",
-      "size": 3581
+      "sha256": "f289d805185344f2ea5c4c2671ddfa78aa96384eb2abf5c9f9916c91f72105c1",
+      "size": 3930
     },
     {
       "path": "src/presets.js",
@@ -148,8 +148,8 @@
     },
     {
       "path": "src/renderer/index.html",
-      "sha256": "649d76ab7e1822878c3cb408ddb16743a82b286f7a7a9f58efd96cdf3563bede",
-      "size": 1547
+      "sha256": "4ab5922e870c636e7512e2e123146a688a76ec6044965046ff213c5f62ad6b1c",
+      "size": 1582
     },
     {
       "path": "src/renderer/logo.svg",
@@ -157,19 +157,24 @@
       "size": 4697
     },
     {
+      "path": "src/renderer/newgame.js",
+      "sha256": "ebe47425c1d7df673ee9c7c5b51b650566a0b22ac1ffb3c88b8f34aeb9dccd94",
+      "size": 14808
+    },
+    {
       "path": "src/renderer/pages.css",
-      "sha256": "9685f5f0c9e4f2d97680f27670ccae5e333861eb30d18be5aad0a9ff43d70ea1",
-      "size": 16952
+      "sha256": "033f70a4ace111b4ae4a14da3d06be610766db172866a719157702da64ab7fa4",
+      "size": 21599
     },
     {
       "path": "src/renderer/pages.js",
-      "sha256": "927cbd221d60bb7c34468232f2051ff2a87c655919377b4b095c0387e22f541d",
-      "size": 27817
+      "sha256": "64775f60afb058c79830680c1f9977e7c5a825431599d02e9b9117e20861185e",
+      "size": 28058
     },
     {
       "path": "src/renderer/studio.js",
-      "sha256": "375eaa14bdb8e55a590db0097e616e5275b3a36fe0563fd668e45a437e301c95",
-      "size": 16900
+      "sha256": "3c453507d3637d16c91b80cad2b0fa9ba7441245955480bb54354fd3079341e9",
+      "size": 25082
     },
     {
       "path": "src/renderer/vendor/addon-fit.js",
