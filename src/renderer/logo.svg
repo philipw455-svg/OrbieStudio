@@ -1,7 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
 <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb066"/><stop offset=".55" stop-color="#8a5aa8"/><stop offset="1" stop-color="#2f7fa0"/></linearGradient></defs>
 <rect width="120" height="120" rx="28" fill="url(#g)"/>
-<path d="M12 72a48 15 0 0 1 40-14.300" transform="rotate(-16 60 72)" fill="none" stroke="#fff" stroke-width="5.500" stroke-linecap="round" opacity=".55"/>
 <path d="M60 24c18 0 29 12 29 31 0 18-11 29-29 29S31 73 31 55c0-19 11-31 29-31z" fill="#ffefd8"/>
 <ellipse cx="46" cy="37" rx="8" ry="4" fill="#fff" transform="rotate(-28 46 37)"/>
 <ellipse cx="50" cy="52" rx="4.300" ry="6" fill="#16130f"/>
@@ -19,8 +18,18 @@
 <path d="M28.500 53.500l.100 1" fill="none" stroke="#fff" stroke-width="4.200" stroke-linecap="round" opacity=".85"/>
 <path d="M12 72a48 15 0 0 0 96 0" transform="rotate(-16 60 72)" fill="none" stroke="#3a2456" stroke-width="12" stroke-linecap="round" opacity=".28"/>
 <path d="M12 72a48 15 0 0 0 96 0" transform="rotate(-16 60 72)" fill="none" stroke="#fff" stroke-width="7.500" stroke-linecap="round"/>
-<g transform="translate(106.100 56.500) rotate(-106) scale(1.250)">
-<path d="M-11 0h-9" stroke="#ffe08a" stroke-width="5.500" stroke-linecap="round"/>
+<!-- a little puff at the end of the trail -->
+<g fill="#fff">
+<circle cx="13.500" cy="82" r="7.200"/>
+<circle cx="20.500" cy="76.500" r="5.200"/>
+<circle cx="8.500" cy="75" r="4.600"/>
+<circle cx="15" cy="70.500" r="3.800"/>
+<circle cx="7.500" cy="65.500" r="2.300" opacity=".85"/>
+<circle cx="13" cy="61.500" r="1.500" opacity=".7"/>
+</g>
+<!-- the rocket sits on the end of the trail, so the trail comes out of its bottom -->
+<g transform="translate(103 47.500) rotate(-106) scale(1.250)">
+<path d="M-11.500 0h-1.500" stroke="#ffcf5a" stroke-width="4.600" stroke-linecap="round"/>
 <path d="M-9-6l-6-5v22l6-5z" fill="#e2493b"/>
 <path d="M-10-6.500h12c6 0 10 3.500 12 6.500-2 3-6 6.500-12 6.500h-12z" fill="#fff" stroke="#3a2456" stroke-width="1.200" stroke-linejoin="round"/>
 <circle cx="3" cy="0" r="2.800" fill="#8a5aa8"/>
