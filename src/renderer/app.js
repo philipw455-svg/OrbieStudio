@@ -1383,12 +1383,10 @@ function mainMenu(anchor) {
     { head: 'Theme' },
     ...THEMES.map(t => ({ label: t.name, sub: t.id === curTheme() ? 'On now' : t.sub, run: () => setTheme(t.id) })),
     { sep: true },
-    { label: 'Quick guide (PDF)', sub: 'Save a 2-page explanation to share', run: downloadQuickGuide },
     { label: 'Shortcuts', k: 'F1', run: helpModal },
     { label: 'Check for updates', sub: 'You have ' + (S.info ? S.info.version : ''), run: async () => { const u = await safely(() => D.checkUpdate()); if (u) { if (u.available) { showUpdate(u); updateModal(u); } else toast(`You have the newest version (${u.current}).`); } } },
   ]);
 }
-async function downloadQuickGuide() { const f = await safely(() => D.quickGuide()); if (f) toast('Saved ' + f); }
 async function switchFolder(ws) {
   const p = await safely(() => D.pickProject());
   if (!p || p.toLowerCase() === ws.path.toLowerCase()) return;
@@ -1614,7 +1612,7 @@ function helpModal() {
     ['Maximize a tile', 'Double-click its title'], ['Copy in a terminal', 'Select, then Ctrl+C or right-click'], ['Paste in a terminal', 'Ctrl+V or right-click'], ['Next project', 'Ctrl+Tab'], ['Close a dialog / restore', 'Esc']];
   modal({ title: 'Shortcuts', body: [h('div', { class: 'kbd' }, rows.flatMap(([a, k]) => [h('span', { text: a }), h('kbd', { text: k })])),
     h('p', { class: 'hint', text: `Orbie Studio ${S.info ? S.info.version : ''}. Created and published by ${(S.info && S.info.publisher) || 'Cohesive'}.` })],
-    actions: [{ label: 'Save quick guide (PDF)', left: true, onClick: () => { downloadQuickGuide(); } }, { label: 'Close' }] });
+    actions: [{ label: 'Close' }] });
 }
 
 /* ------------------------------------------------------------------ keyboard */

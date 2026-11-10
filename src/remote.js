@@ -16,7 +16,6 @@ const STATIC = {
   '/remote.js': ['remote/remote.js', 'text/javascript; charset=utf-8'],
   '/remote.css': ['remote/remote.css', 'text/css; charset=utf-8'],
   '/icon.png': ['renderer/icon.png', 'image/png'],
-  '/quick-guide.pdf': ['docs/Agent Deck Quick Guide.pdf', 'application/pdf'],
   '/vendor/xterm.js': ['renderer/vendor/xterm.js', 'text/javascript; charset=utf-8'],
   '/vendor/xterm.css': ['renderer/vendor/xterm.css', 'text/css; charset=utf-8'],
   '/vendor/addon-fit.js': ['renderer/vendor/addon-fit.js', 'text/javascript; charset=utf-8'],
@@ -115,7 +114,7 @@ module.exports = function createRemote(deps) {
     const f = path.join(__dirname, rel);
     fs.readFile(f, (err, buf) => {
       if (err) { res.writeHead(404); return res.end(); }
-      res.writeHead(200, Object.assign({ 'Content-Type': type, 'Content-Length': buf.length }, SEC, /pdf/.test(type) ? { 'Content-Disposition': 'attachment; filename="Agent Deck Quick Guide.pdf"' } : {}));
+      res.writeHead(200, Object.assign({ 'Content-Type': type, 'Content-Length': buf.length }, SEC));
       res.end(buf);
     });
   }

@@ -1,4 +1,4 @@
-// Agent Deck: the narrow bridge between the window and the main process.
+// Orbie Studio: the narrow bridge between the window and the main process.
 'use strict';
 const { contextBridge, ipcRenderer } = require('electron');
 
@@ -59,7 +59,6 @@ contextBridge.exposeInMainWorld('deck', {
   clipRead: () => call('clipboard:read'),
   clipWrite: (t) => call('clipboard:write', t),
   saveSettings: (patch) => call('settings:save', patch),
-  quickGuide: () => call('docs:quickGuide'),
   replies: (key) => call('replies:list', key),
   remoteInfo: () => call('remote:info'),
   remoteSet: (patch) => call('remote:set', patch),

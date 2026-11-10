@@ -1169,12 +1169,12 @@ function runLauncher(key, id) {
 }
 
 /* ------------------------------------------------------------------ updates: GitHub first, then a shared folder */
-// Every copy checks github.com/<repo> (public) on its own: update/manifest.json on the main branch says the newest
+// Every copy checks github.com/<repo> (public) on its own: update/orbie-studio.json on the main branch says the newest
 // version and lists every file with its SHA-256. Files are downloaded from that version's git tag and checked before
-// anything is replaced. A shared folder (Google Drive, Documents\Dev\agent-deck) still works as a fallback.
+// anything is replaced. A folder that the owner picked still works as a fallback.
 
 const UPDATE_REPO = 'ki11phil0405-bit/agent-deck';
-const PRODUCT = 'orbie-studio';              // an update must carry this name, so an Agent Deck update can never install over Orbie Studio
+const PRODUCT = 'orbie-studio';              // an update must carry this name, so an update for another app can never install over Orbie Studio
 const UPDATE_LIST = 'update/orbie-studio.json';
 const TESTING = !!process.env.AGENT_DECK_SELFTEST && !app.isPackaged;
 function updateRepo() {
@@ -1207,7 +1207,7 @@ function isOurs(d) {
   try { const pkg = readJSON(path.join(d, 'package.json'), null); return !!pkg && pkg.name === PRODUCT && fs.existsSync(path.join(d, 'src', 'main.js')); } catch (e) { return false; }
 }
 function folderCandidates() {
-  return [settings.updateSource, path.join(os.homedir(), 'Documents', 'Dev', 'agent-deck')].filter(Boolean);
+  return [settings.updateSource, path.join(os.homedir(), 'Documents', 'Orbie')].filter(Boolean);
 }
 function updateSource() {
   for (const d of folderCandidates()) if (isOurs(d)) return d;
@@ -1480,18 +1480,6 @@ function remoteApi() {
   };
 }
 
-/* ------------------------------------------------------------------ quick guide download */
-
-const QUICK_GUIDE = () => path.join(__dirname, 'docs', 'Agent Deck Quick Guide.pdf');
-async function saveQuickGuide() {
-  if (!fs.existsSync(QUICK_GUIDE())) throw new Error('The quick guide is missing from this copy of Orbie Studio. Check for updates.');
-  const r = await dialog.showSaveDialog(win, { title: 'Save the Orbie Studio quick guide', defaultPath: path.join(app.getPath('downloads'), 'Orbie Studio Quick Guide.pdf'), filters: [{ name: 'PDF', extensions: ['pdf'] }] });
-  if (r.canceled || !r.filePath) return null;
-  fs.copyFileSync(QUICK_GUIDE(), r.filePath);
-  shell.openPath(r.filePath);
-  return r.filePath;
-}
-
 /* ------------------------------------------------------------------ IPC */
 
 function handle(name, fn) {
@@ -1513,7 +1501,6 @@ function wireIpc() {
     const r = await dialog.showOpenDialog(win, { title: 'Choose the Orbie Studio update folder', defaultPath: updateSource() || app.getPath('home'), properties: ['openDirectory'] });
     if (r.canceled) return updateSource();
     let d = r.filePaths[0];
-    if (!fs.existsSync(path.join(d, 'package.json')) && fs.existsSync(path.join(d, 'agent-deck', 'package.json'))) d = path.join(d, 'agent-deck');
     if (!isOurs(d)) throw new Error('That folder has no Orbie Studio update in it. Pick the folder that holds the Orbie Studio code.');
     settings.updateSource = d; saveSettings(); return settings.updateSource;
   });
@@ -1586,7 +1573,6 @@ function wireIpc() {
   handle('file:image', (key, rel) => { const p = projects.get(key); const f = resolveFile(p, rel); watchFile(p, rel, true); return imageData(f); });
   handle('inbox:answer', (key, itemId, text) => answerInbox(key, itemId, text));
   handle('inbox:dismiss', (key, itemId) => { const p = projects.get(key); clearInbox(p, i => i.id === itemId); return true; });
-  handle('docs:quickGuide', () => saveQuickGuide());
   handle('replies:list', (key) => { const p = projects.get(key); return p ? p.replies : []; });
   handle('remote:info', () => remote.info());
   handle('remote:set', (patch) => remote.set(patch));

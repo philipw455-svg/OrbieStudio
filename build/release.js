@@ -3,7 +3,6 @@
 // Run after `npm run dist` and after committing the code:  node build/release.js
 // The files are downloaded from the commit that is checked out now (its SHA), so commit the code first,
 // then run this and commit update/orbie-studio.json on top.
-// update/manifest.json is the old Agent Deck list. Leave it alone: Agent Deck 1.7.0 copies still read it.
 'use strict';
 const fs = require('fs');
 const path = require('path');

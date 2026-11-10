@@ -327,7 +327,6 @@ document.addEventListener('mousedown', (e) => { if (!$('pop').hidden && !e.targe
 
 $('menu-btn').addEventListener('click', (e) => pop(e.currentTarget, [
   { label: 'Refresh everything', run: () => resync() },
-  { label: 'Quick guide (PDF)', run: () => { const a = h('a', { href: '/quick-guide.pdf', download: 'Agent Deck Quick Guide.pdf' }); document.body.append(a); a.click(); a.remove(); } },
   { label: 'Sign out this device', run: () => { if (confirm('Sign out this device? You will need a new code from the PC to come back.')) safely(async () => { await api('signout', {}); showPair(); }); } },
 ]));
 

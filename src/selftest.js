@@ -247,7 +247,7 @@ module.exports = {
       // ---------------- updates from GitHub (a local stand-in serves the same paths)
       const srcRoot = path.join(__dirname, '..');
       const crypto = require('crypto');
-      const ghFiles = ['src/main.js', 'src/remote/index.html', 'src/docs/Agent Deck Quick Guide.pdf'].map(rel => ({ path: rel, sha256: crypto.createHash('sha256').update(fs.readFileSync(path.join(srcRoot, rel))).digest('hex') }));
+      const ghFiles = ['src/main.js', 'src/remote/index.html', 'src/renderer/logo.svg'].map(rel => ({ path: rel, sha256: crypto.createHash('sha256').update(fs.readFileSync(path.join(srcRoot, rel))).digest('hex') }));
       const mineDeps = JSON.parse(fs.readFileSync(path.join(srcRoot, 'package.json'), 'utf8')).dependencies;
       let ghManifest = { product: 'orbie-studio', version: '9.9.8', ref: 'v9.9.8', electron: process.versions.electron, dependencies: mineDeps, notes: '- GitHub notes', files: ghFiles, installer: 'https://github.com/x/y/releases/download/v9.9.8/Orbie-Studio-Setup-9.9.8.exe' };
       let tamper = false;
@@ -263,7 +263,7 @@ module.exports = {
       let G = await js(`window.deck.checkUpdate()`);
       log('GitHub update found by itself', G.available && G.via === 'github' && G.version === '9.9.8' && !G.needsInstaller && /GitHub notes/.test(G.notes), JSON.stringify(G).slice(0, 200));
       let staged = null; try { staged = await ctx.updater.stage(ctx.updater.manifest()); } catch (e) { staged = 'ERR ' + e.message; }
-      log('GitHub files download and match their checksums', typeof staged === 'string' && !staged.startsWith('ERR') && fs.existsSync(path.join(staged, 'src', 'docs', 'Agent Deck Quick Guide.pdf')), String(staged));
+      log('GitHub files download and match their checksums', typeof staged === 'string' && !staged.startsWith('ERR') && fs.existsSync(path.join(staged, 'src', 'renderer', 'logo.svg')), String(staged));
       tamper = true;
       let ghBad = ''; try { await ctx.updater.stage(ctx.updater.manifest()); } catch (e) { ghBad = e.message; }
       log('a changed file is refused', /checksum/.test(ghBad), ghBad);
@@ -451,7 +451,7 @@ module.exports = {
       await js(`document.querySelector('.modal .m-head .icon-btn').click()`);
       RI = await js(`window.deck.remoteSet({ enabled: false })`);
       log('remote view turns off', !RI.listening && (await rq('GET', '/')).status === 0);
-      // ---------------- replies, main menu, folder switch, quick guide
+      // ---------------- replies, main menu, folder switch
       // dialogs stay above agent windows even after many clicks raise them
       await js(`S.z = 50000; for (const el of document.querySelectorAll('.tile')) el.style.zIndex = ++S.z; document.querySelector('.tile').classList.add('max')`);
       await js(`helpModal()`); await sleep(300);
@@ -490,16 +490,15 @@ module.exports = {
       log('reply button marked seen', (await js(`!document.querySelector('.tile .icon-btn.new')`)) === true);
       await js(`document.getElementById('main-menu').click()`); await sleep(300);
       const mm = await js(`document.querySelector('.menu').textContent`);
-      log('main menu has folders, remote and the quick guide', /Switch this tab to another folder/.test(mm) && /Change agents folder/.test(mm) && /Remote view/.test(mm) && /Quick guide/.test(mm), mm.slice(0, 200));
+      log('main menu has folders, remote and themes', /Switch this tab to another folder/.test(mm) && /Change agents folder/.test(mm) && /Remote view/.test(mm) && /Midnight/.test(mm) && !/Quick guide/.test(mm), mm.slice(0, 200));
       await shot('17_main_menu');
       await js(`closeMenu()`);
       await js(`document.querySelector('.toolbar .proj').click()`); await sleep(300);
       log('folder menu opens from the project name', (await js(`document.querySelector('.menu').textContent.includes('Show project folder')`)) === true);
       await shot('18_folder_menu');
       await js(`closeMenu()`);
-      log('quick guide is bundled', fs.existsSync(path.join(__dirname, 'docs', 'Agent Deck Quick Guide.pdf')));
-      const qg = await new Promise((resolve) => { http.get({ host: '127.0.0.1', port: 7499, path: '/quick-guide.pdf' }, (res) => { resolve(res.statusCode); res.resume(); }).on('error', () => resolve(0)); });
-      log('remote view is off so the guide link is closed too', qg === 0);
+      const qg = await new Promise((resolve) => { http.get({ host: '127.0.0.1', port: 7499, path: '/icon.png' }, (res) => { resolve(res.statusCode); res.resume(); }).on('error', () => resolve(0)); });
+      log('remote view is off, so its port is closed', qg === 0);
       // switch folder: point the tab at a second folder
       const proj2 = path.join(ROOT, 'Dev', 'other-app');
       fs.mkdirSync(proj2, { recursive: true });

@@ -1,6 +1,6 @@
 # Orbie Studio
 
-Your team's AI game studio (before version 1.0 the name was Agent Deck). A Windows command post for running Claude Code agents side by side on one board: real terminals, a team that talks to each other, Replies, Needs you, a task board, Remote view for your Mac or phone, and one-click updates.
+Your team's AI game studio. A Windows command post for running Claude Code agents side by side on one board: real terminals, a team that talks to each other, Replies, Needs you, a task board, Remote view for your Mac or phone, and one-click updates.
 
 Created and published by **Cohesive**. © 2026 Cohesive. All rights reserved. The code is public so every copy can update itself; it is not open source.
 
@@ -12,7 +12,7 @@ You also need Claude Code: in PowerShell run `irm https://claude.ai/install.ps1 
 
 ## Updates
 
-Every copy checks `update/orbie-studio.json` on this repo's `main` branch every 10 minutes (`update/manifest.json` is the old Agent Deck list; leave it for Agent Deck 1.7.0 copies). When a newer version is listed, Orbie Studio shows **Restart to update**, downloads each file from the commit that version lists, checks its SHA-256, backs up the current version and restarts. Updates that change the app's libraries download the new installer from the release instead.
+Every copy checks `update/orbie-studio.json` on this repo's `main` branch every 10 minutes. When a newer version is listed, Orbie Studio shows **Restart to update**, downloads each file from the commit that version lists, checks its SHA-256, backs up the current version and restarts. Updates that change the app's libraries download the new installer from the release instead.
 
 ## Publishing a new version (Cohesive)
 
