@@ -4,6 +4,7 @@
 
 S.studioView = 'canvas';        // 'canvas' = agent cards, 'board' = the big view with the live terminals
 S.sel = {};                     // game key -> the selected agent
+S.cvTool = 'move';              // 'move', 'comment' or 'draw'
 const NODE_W = 216, NODE_H = 104, GRID = 24;
 const STICKY_COLORS = ['#ffe08a', '#b9e6ff', '#c8f2c2', '#ffc9de'];
 const FLOW_HINT = { flow: 'Work flows from left to right', tree: 'Work flows from top to bottom', orbit: 'The lead sits in the center', lanes: 'One lane for each agent', timeline: 'One row for each agent' };
@@ -11,11 +12,13 @@ let cv = null;                  // the parts of the canvas that is on screen now
 let cvDragging = false;
 
 function canvasState(ws) {
+  if (!ws.board && ws.team) setupBoard(ws);
   const b = ws.board || (ws.board = { tiles: [], view: { x: 0, y: 0, z: 1 } });
   const c = b.canvas = b.canvas || {};
   if (!['flow', 'tree', 'orbit', 'lanes', 'timeline'].includes(c.mode)) c.mode = 'flow';
   c.pos = c.pos && typeof c.pos === 'object' ? c.pos : {};
   c.notes = Array.isArray(c.notes) ? c.notes : [];
+  for (const k of ['links', 'pins', 'ink']) c[k] = Array.isArray(c[k]) ? c[k] : [];
   return c;
 }
 function qaAgent(ws) { const lead = leadAgent(ws); return ws.team.agents.find(a => a !== lead && mascotOf(a, ws) === 'qa') || null; }
@@ -79,13 +82,21 @@ function drawEdges(ws) {
   let maxX = 0, maxY = 0;
   for (const a of ws.team.agents) { const p = nodePos(ws, a); maxX = Math.max(maxX, p.x + NODE_W); maxY = Math.max(maxY, p.y + NODE_H); }
   for (const n of canvasState(ws).notes) { maxX = Math.max(maxX, n.x + 200); maxY = Math.max(maxY, n.y + 150); }
-  const mk = (cls, d) => { const e = document.createElementNS(NS, 'path'); e.setAttribute('class', cls); e.setAttribute('d', d); out.push(e); };
+  const mk = (cls, d) => { const e = document.createElementNS(NS, 'path'); e.setAttribute('class', cls); e.setAttribute('d', d); out.push(e); return e; };
   for (const a of ws.team.agents) {
     if (a === lead) continue;
     const d = edgePath(nodePos(ws, lead), nodePos(ws, a));
     mk('edge give', d);
     if (statusOf(ws, a.id) === 'working') mk('edge flowing', d);
     if (qa && a !== qa) mk('edge check', edgePath(nodePos(ws, a), nodePos(ws, qa)));
+  }
+  // links that the owner drew with the connect ball
+  for (const l of canvasState(ws).links) {
+    const a = agentById(ws, l.from), b = agentById(ws, l.to);
+    if (!a || !b) continue;
+    const d = edgePath(nodePos(ws, a), nodePos(ws, b));
+    mk('edge user ' + (l.kind === 'check' ? 'check' : 'give'), d);
+    mk('edge hit', d).addEventListener('click', (e) => linkMenu(ws, l, e));
   }
   cv.svg.replaceChildren(...out);
   cv.layer.style.width = (maxX + 24) + 'px'; cv.layer.style.height = (maxY + 96) + 'px';
@@ -102,10 +113,13 @@ function pageStudio(ws) {
   const layer = h('div', { class: 'cv-layer' });
   const svgEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   svgEl.setAttribute('class', 'cv-links'); svgEl.setAttribute('aria-hidden', 'true');
-  layer.append(svgEl);
-  const el = h('div', { class: 'cv' }, layer);
+  const inkEl = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  inkEl.setAttribute('class', 'cv-ink'); inkEl.setAttribute('aria-hidden', 'true');
+  layer.append(inkEl, svgEl);
+  layer.addEventListener('pointerdown', (e) => canvasDown(ws, e));
+  const el = h('div', { class: 'cv tool-' + S.cvTool }, layer);
   const side = h('aside', { class: 'gcard inspector', 'aria-label': 'Selected agent' });
-  cv = { el, layer, svg: svgEl, side, key: ws.key };
+  cv = { el, layer, svg: svgEl, ink: inkEl, side, key: ws.key };
   const live = ws.team.agents.filter(a => running(ws, a.id)).length;
   const wrap = h('div', { class: 'studio' },
     h('div', { class: 'cv-wrap' }, el,
@@ -113,17 +127,25 @@ function pageStudio(ws) {
         h('span', { class: 'chip legend' }, h('i', { class: 'lg give' }), 'gives work', h('i', { class: 'lg check' }), 'QA checks')),
       h('div', { class: 'cv-tools glassbar', role: 'toolbar', 'aria-label': 'Canvas tools' },
         h('button', { class: 'tool primary', title: 'Start the agents', text: 'Launch team', on: { click: () => launchTeam(ws) } }),
+        [['move', 'Move', 'Drag a card. Drag the ball on a card to connect two agents.'], ['comment', 'Comment', 'Click the canvas or a card to pin a comment.'], ['draw', 'Draw', 'Draw on the canvas.']].map(([id, name, tip]) =>
+          h('button', { class: 'tool' + (S.cvTool === id ? ' on' : ''), title: tip, 'aria-pressed': S.cvTool === id ? 'true' : 'false', text: name, on: { click: () => { S.cvTool = id; drawPage(); } } })),
         h('button', { class: 'tool', title: 'Add a sticky note to the canvas', text: 'Sticky note', on: { click: () => addSticky(ws) } }),
         h('button', { class: 'tool', title: 'Put every card back in its place', text: 'Tidy up', on: { click: () => { layoutNodes(ws, c.mode); drawPage(); } } }),
-        h('button', { class: 'tool', title: 'Edit the agents of this team', text: 'Edit team', on: { click: () => teamModal(ws) } }),
+        c.ink.length ? h('button', { class: 'tool', title: 'Remove every drawing', text: 'Clear drawing', on: { click: () => { c.ink = []; ws.save(); drawPage(); } } }) : null,
         h('span', { class: 'tsep' }),
-        h('button', { class: 'tool', title: 'Open the board with every live terminal', text: 'All terminals', on: { click: () => studioView('board') } }))),
+        h('button', { class: 'tool', title: 'Edit the agents of this team', text: 'Edit team', on: { click: () => teamModal(ws) } }),
+        h('button', { class: 'tool', title: 'The 12 pictures and the game direction', text: 'Mockup', on: { click: () => { S.page = 'approval'; paintPage(); } } }),
+        h('button', { class: 'tool', title: 'Open the board with every live terminal', text: 'All terminals', on: { click: () => studioView('board') } })),
+      c.kickoff ? h('div', { class: 'kick glassbar' }, h('b', { text: 'The new game kickoff is ready.' }), h('span', { text: `Launch the team, then send the kickoff to ${leadAgent(ws).name}.` }),
+        h('button', { class: 'tool primary', text: 'Send kickoff', on: { click: () => sendKickoff(ws) } }), h('button', { class: 'tool', text: 'Dismiss', on: { click: () => { delete c.kickoff; ws.save(); drawPage(); } } })) : null),
     side);
   // cards and notes go in after the canvas has a size, so a first layout fits the window
   requestAnimationFrame(() => {
     if (!cv || cv.el !== el) return;
     for (const a of ws.team.agents) layer.append(nodeEl(ws, a));
     for (const n of c.notes) layer.append(stickyEl(ws, n));
+    for (const pin of c.pins) layer.append(pinEl(ws, pin, false));
+    drawInk(ws);
     drawEdges(ws);
     renderInspector(ws);
   });
@@ -133,11 +155,13 @@ function nodeEl(ws, a) {
   const p = nodePos(ws, a), st = statusOf(ws, a.id);
   const el = h('div', { class: 'node' + (S.sel[ws.key] === a.id ? ' sel' : '') + (st === 'needs' ? ' needs' : ''), tabindex: 0, role: 'button', 'aria-label': `${a.name}, ${STATUS_WORD[st] || st}. Press Enter to open the big view.`,
     title: 'Click to select. Double-click to open the big view.', style: { left: p.x + 'px', top: p.y + 'px', width: NODE_W + 'px', height: NODE_H + 'px' }, dataset: { id: a.id } },
+    h('span', { class: 'ball', title: 'Drag to another card to connect the two agents', 'aria-hidden': 'true' }),
     h('div', { class: 'n-top' }, avatar(a, ws, 36), h('b', { text: a.name })),
     h('div', { class: 'n-role', text: a.role || '' }),
     h('div', { class: 'n-st' }, statusPill(st), h('span', { class: 'n-note', text: st === 'off' ? '' : agentNote(ws, a) })));
   let start = null;
-  el.addEventListener('pointerdown', (e) => { if (e.button !== 0) return; start = { x: e.clientX, y: e.clientY, px: p.x, py: p.y, moved: false }; el.setPointerCapture(e.pointerId); });
+  el.querySelector('.ball').addEventListener('pointerdown', (e) => { if (e.button !== 0 || S.cvTool !== 'move') return; e.stopPropagation(); e.preventDefault(); startLink(ws, a, e); });
+  el.addEventListener('pointerdown', (e) => { if (e.button !== 0 || S.cvTool !== 'move' || e.target.closest('.ball')) return; start = { x: e.clientX, y: e.clientY, px: p.x, py: p.y, moved: false }; el.setPointerCapture(e.pointerId); });
   el.addEventListener('pointermove', (e) => {
     if (!start) return;
     const dx = e.clientX - start.x, dy = e.clientY - start.y;
@@ -249,4 +273,81 @@ function refreshCanvas(ws) {
   drawEdges(ws);
   const f = document.activeElement;
   if (!(f && cv.side.contains(f) && /^(INPUT|TEXTAREA)$/.test(f.tagName))) renderInspector(ws);
+}
+
+/* ------------------------------------------------------------------ connect ball, comment pins, drawing */
+
+function layerXY(e) { const r = cv.layer.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+function svgPath(cls) { const p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('class', cls); return p; }
+function startLink(ws, a, e) {
+  const line = svgPath('edge temp'); cv.svg.append(line); cvDragging = true;
+  const p = nodePos(ws, a), sx = p.x + NODE_W, sy = p.y + NODE_H / 2;
+  const move = (ev) => { const q = layerXY(ev), k = Math.max(30, Math.abs(q.x - sx) * 0.5); line.setAttribute('d', `M${sx} ${sy} C${sx + k} ${sy} ${q.x - k} ${q.y} ${q.x} ${q.y}`); };
+  const up = (ev) => {
+    window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up);
+    line.remove(); cvDragging = false;
+    const t = document.elementFromPoint(ev.clientX, ev.clientY), n = t && t.closest ? t.closest('.node') : null;
+    if (n && n.dataset.id !== a.id) addLink(ws, a.id, n.dataset.id);
+  };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+}
+function addLink(ws, from, to, kind) {
+  const c = canvasState(ws);
+  if (from === to || !agentById(ws, from) || !agentById(ws, to)) return;
+  if (c.links.some(l => l.from === from && l.to === to)) { toast('These two agents have a link already. Click the line to change it.'); return; }
+  c.links.push({ from, to, kind: kind === 'check' ? 'check' : 'give' });
+  if (c.links.length > 40) c.links.shift();
+  ws.save(); drawEdges(ws);
+  toast('Link saved. Each agent learns the link at its next start. Click the line to change it.');
+}
+function linkMenu(ws, l, e) {
+  const c = canvasState(ws), A = agentById(ws, l.from), B = agentById(ws, l.to);
+  const anchor = { getBoundingClientRect: () => ({ left: e.clientX, right: e.clientX, top: e.clientY, bottom: e.clientY, width: 0, height: 0 }) };
+  const set = (kind) => { l.kind = kind; ws.save(); drawEdges(ws); };
+  menu(anchor, [{ head: `${A.name} to ${B.name}` },
+    { label: 'Gives work', sub: l.kind !== 'check' ? 'On now' : `${A.name} gives work to ${B.name}`, run: () => set('give') },
+    { label: 'Checks the work', sub: l.kind === 'check' ? 'On now' : `${B.name} checks the work of ${A.name}`, run: () => set('check') },
+    { sep: true }, { label: 'Remove this link', run: () => { c.links = c.links.filter(x => x !== l); ws.save(); drawEdges(ws); } }]);
+}
+const inkD = (pts) => 'M' + pts.map(p => `${Math.round(p.x)} ${Math.round(p.y)}`).join('L');
+function drawInk(ws) {
+  if (!cv) return;
+  cv.ink.replaceChildren(...canvasState(ws).ink.slice(-200).map(s => { const p = svgPath('ink'); p.setAttribute('d', String((s && s.d) || '').replace(/[^ML0-9 .-]/g, '').slice(0, 20000)); return p; }));
+}
+function canvasDown(ws, e) {
+  if (e.button !== 0 || e.target.closest('.sticky, .pin, .ball')) return;
+  const c = canvasState(ws);
+  if (S.cvTool === 'comment') {
+    const node = e.target.closest('.node'), p = layerXY(e);
+    const pin = { id: uid(), x: Math.round(p.x), y: Math.round(p.y), text: '', agentId: node ? node.dataset.id : '' };
+    c.pins.push(pin); if (c.pins.length > 60) c.pins.shift();
+    ws.save(); cv.layer.append(pinEl(ws, pin, true)); e.preventDefault();
+  } else if (S.cvTool === 'draw') {
+    const pts = [layerXY(e)], line = svgPath('ink'); cv.ink.append(line); cvDragging = true;
+    const move = (ev) => { const q = layerXY(ev), l = pts[pts.length - 1]; if (Math.hypot(q.x - l.x, q.y - l.y) < 3 || pts.length > 1500) return; pts.push(q); line.setAttribute('d', inkD(pts)); };
+    const up = () => {
+      window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); cvDragging = false;
+      if (pts.length > 1) { const first = !c.ink.length; c.ink.push({ d: inkD(pts) }); if (c.ink.length > 200) c.ink.shift(); ws.save(); if (first) drawPage(); } else line.remove();
+    };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); e.preventDefault();
+  }
+}
+function pinEl(ws, pin, open) {
+  const c = canvasState(ws), a = pin.agentId ? agentById(ws, pin.agentId) : null;
+  const ta = h('textarea', { rows: 3, placeholder: a ? `Comment for ${a.name}` : 'Comment', 'aria-label': 'Comment text' });
+  ta.value = pin.text || '';
+  const saveText = debounce(() => ws.save(), 500);
+  ta.addEventListener('input', () => { pin.text = ta.value.slice(0, 1000); saveText(); });
+  const pop = h('div', { class: 'pinpop', hidden: !open }, ta, h('div', { class: 'ac-acts' },
+    a ? h('button', { class: 'btn sm primary', text: `Send to ${a.name}`, on: { click: async () => {
+      const text = ta.value.trim(); if (!text) return;
+      const r = await safely(() => D.say(ws.key, { to: a.id, text, comment: true, about: 'the Studio canvas' }));
+      if (r) toast(r.sent && r.sent.length ? `Sent to ${a.name}` : `${a.name} is not running. Start it first.`, r.sent && r.sent.length ? '' : 'err');
+    } } }) : null,
+    h('button', { class: 'btn sm', text: 'Close', on: { click: () => { pop.hidden = true; } } }),
+    h('button', { class: 'btn sm ghost', text: 'Delete', on: { click: () => { c.pins = c.pins.filter(x => x !== pin); ws.save(); el.remove(); } } })));
+  const dot = h('button', { class: 'pin-dot', title: 'Open this comment', 'aria-label': a ? `Comment for ${a.name}` : 'Comment', html: svg('M4 5h16v11H9l-5 4z'), on: { click: () => { pop.hidden = !pop.hidden; if (!pop.hidden) ta.focus(); } } });
+  const el = h('div', { class: 'pin', style: { left: pin.x + 'px', top: pin.y + 'px' } }, dot, pop);
+  if (open) setTimeout(() => ta.focus(), 30);
+  return el;
 }

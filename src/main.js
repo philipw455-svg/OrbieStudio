@@ -273,7 +273,7 @@ function quoteWinArg(a) {
 
 function buildClaudeArgs(p, a, c, opts) {
   const args = [];
-  if (!opts.resume && a.prompt) args.push(renderPrompt(a.prompt, p, a));
+  if (!opts.resume && a.prompt) args.push(renderPrompt(a.prompt, p, a) + flowRules(p, a));
   if (a.model) args.push('--model', a.model);
   if (a.permissionMode && a.permissionMode !== 'default') args.push('--permission-mode', a.permissionMode);
   // Status hooks + Orbie Studio tools come from a per-console settings + MCP file.
@@ -319,6 +319,23 @@ function splitArgs(s) {
   return out;
 }
 
+// Links that the owner drew on the Studio canvas become plain rules in the prompt of each agent.
+function flowRules(p, a) {
+  const links = p.board && p.board.canvas && Array.isArray(p.board.canvas.links) ? p.board.canvas.links.slice(0, 40) : [];
+  const name = (id) => { const x = (p.team.agents || []).find(y => y.id === id); return x ? String(x.name).replace(/[\r\n]+/g, ' ').slice(0, 60) : ''; };
+  const out = [];
+  for (const l of links) {
+    if (!l || l.from === l.to || !name(l.from) || !name(l.to)) continue;
+    if (l.kind === 'check') {
+      if (l.from === a.id) out.push(`${name(l.to)} checks your work: hand each finished task to ${name(l.to)}.`);
+      if (l.to === a.id) out.push(`You check the work of ${name(l.from)}: report pass or fail with proof, and never fix what you check.`);
+    } else {
+      if (l.from === a.id) out.push(`You give work to ${name(l.to)}.`);
+      if (l.to === a.id) out.push(`You get work from ${name(l.from)}.`);
+    }
+  }
+  return out.length ? ' Flow rules from the Studio canvas: ' + out.join(' ') : '';
+}
 function renderPrompt(t, p, a) {
   const names = (p.team.agents || []).map(x => `${x.name} (${x.role || 'agent'})`).join(', ');
   return String(t)
@@ -1480,6 +1497,66 @@ function remoteApi() {
   };
 }
 
+/* ------------------------------------------------------------------ new game: source files, workflow, mockup */
+// The owner's files are copied into the game folder: source/story, source/art, source/map, source/characters and mockup.
+// Only known file types are copied, and only into those folders.
+const IMG_EXT = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp'];
+const INTAKE = { story: ['txt', 'md', 'markdown', 'pdf', 'docx', 'rtf', 'epub'], art: IMG_EXT.concat('pdf'), map: IMG_EXT.concat('pdf'), characters: IMG_EXT.concat('pdf'), mockup: IMG_EXT };
+const INTAKE_MAX = { story: 20, art: 40, map: 20, characters: 40, mockup: 12 };
+function intakeRel(slot) { return slot === 'mockup' ? 'mockup' : 'source/' + slot; }
+function intakeProject(key, slot) {
+  const p = projects.get(key);
+  if (!p) throw new Error('Open the game first.');
+  if (slot !== undefined && !Object.prototype.hasOwnProperty.call(INTAKE, slot)) throw new Error('Unknown kind of file.');
+  return p;
+}
+function intakeList(key) {
+  const p = intakeProject(key);
+  const out = {};
+  for (const slot of Object.keys(INTAKE)) {
+    const dir = path.join(p.path, ...intakeRel(slot).split('/'));
+    let names = []; try { names = fs.readdirSync(dir).filter(n => INTAKE[slot].includes(path.extname(n).slice(1).toLowerCase())).sort(); } catch (e) {}
+    out[slot] = names.slice(0, 60).map(n => ({ name: n, rel: intakeRel(slot) + '/' + n, image: IMG_EXT.includes(path.extname(n).slice(1).toLowerCase()) }));
+  }
+  const has = (f) => { try { return fs.statSync(path.join(p.path, f)).isFile(); } catch (e) { return false; } };
+  return { files: out, direction: has('GAME_DIRECTION.md'), workflow: has('WORKFLOW.md'), prompts: has(path.join('mockup', 'PROMPTS.md')) };
+}
+function intakeAdd(key, slot, files) {
+  const p = intakeProject(key, slot);
+  const dir = path.join(p.path, ...intakeRel(slot).split('/'));
+  const skipped = [];
+  for (const f of (Array.isArray(files) ? files : []).slice(0, 40)) {
+    const src = String(f || '');
+    let st = null; try { st = path.isAbsolute(src) ? fs.statSync(src) : null; } catch (e) {}
+    const ext = path.extname(src).slice(1).toLowerCase();
+    const base = path.basename(src).replace(/[^\w .()-]/g, '_').slice(-120);
+    if (!st || !st.isFile() || !INTAKE[slot].includes(ext) || st.size > 200e6 || !base) { skipped.push(path.basename(src)); continue; }
+    fs.mkdirSync(dir, { recursive: true });
+    let have = 0; try { have = fs.readdirSync(dir).length; } catch (e) {}
+    if (have >= INTAKE_MAX[slot]) { skipped.push(base); continue; }
+    let name = base, i = 2;
+    while (fs.existsSync(path.join(dir, name))) name = base.replace(/(\.[^.]+)$/, ` (${i++})$1`);
+    fs.copyFileSync(src, path.join(dir, name));
+  }
+  return Object.assign(intakeList(key), { skipped });
+}
+async function intakePick(key, slot) {
+  intakeProject(key, slot);
+  const r = await dialog.showOpenDialog(win, { title: 'Choose files', properties: ['openFile', 'multiSelections'], filters: [{ name: 'Allowed files', extensions: INTAKE[slot] }] });
+  return r.canceled ? intakeList(key) : intakeAdd(key, slot, r.filePaths);
+}
+function saveWorkflow(key, o) {
+  const p = intakeProject(key);
+  const clean = (s, n) => String(s === undefined || s === null ? '' : s).replace(/[\r\n]+/g, ' ').trim().slice(0, n);
+  const rows = (Array.isArray(o && o.answers) ? o.answers : []).slice(0, 40).map((x, i) => `${i + 1}. **${clean(x && x.q, 200)}** ${clean(x && x.a, 600) || 'No answer.'}`);
+  const text = `# Workflow of ${p.name}\n\nThe owner answered this quiz on ${new Date().toISOString().slice(0, 10)}.\n` +
+    'The Head Supervisor follows these answers and GAME_DIRECTION.md when it decides for the owner.\n\n## Fixed rules\n\n' +
+    '- Publishing always waits for the owner in person.\n- Spending money always waits for the owner in person. Paid picture credits count as spending money.\n- The game is a Roblox game. Leave out everything that does not fit Roblox.\n\n## Answers of the owner\n\n' + rows.join('\n') + '\n';
+  fs.writeFileSync(path.join(p.path, 'WORKFLOW.md'), text, 'utf8');
+  addFeed(p, 'team', 'Workflow saved to WORKFLOW.md.');
+  return true;
+}
+
 /* ------------------------------------------------------------------ IPC */
 
 function handle(name, fn) {
@@ -1604,6 +1681,10 @@ function wireIpc() {
   handle('clipboard:read', () => clipboard.readText());
   handle('clipboard:write', (t) => { clipboard.writeText(String(t)); return true; });
   // The window may change only these settings. Where updates come from is never one of them.
+  handle('intake:list', (key) => intakeList(key));
+  handle('intake:add', (key, slot, files) => intakeAdd(key, slot, files));
+  handle('intake:pick', (key, slot) => intakePick(key, slot));
+  handle('workflow:save', (key, o) => saveWorkflow(key, o));
   handle('settings:save', (patch) => {
     const ok = {};
     if (patch && typeof patch.theme === 'string' && Object.prototype.hasOwnProperty.call(THEME_BAR, patch.theme)) ok.theme = patch.theme;

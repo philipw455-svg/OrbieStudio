@@ -352,6 +352,45 @@ module.exports = {
       await js(`(()=>{const ta=document.querySelector('#page .sticky textarea');ta.value='Check the lamps';ta.dispatchEvent(new Event('input'));})()`); await sleep(1500);
       log('a sticky note is saved with the game', JSON.parse(fs.readFileSync(path.join(p.agentsDir, 'board.json'), 'utf8')).canvas.notes[0].text === 'Check the lamps');
       await shot('33_canvas_note');
+      // connect ball, comment pin and drawing
+      await js(`addLink(S.tabs[0], 'studio', 'blender', 'check')`); await sleep(300);
+      await js(`(()=>{S.cvTool='comment';drawPage();})()`); await sleep(500);
+      const nb = await js(`(()=>{const r=document.querySelector('#page .node[data-id="qa"]').getBoundingClientRect();return {x:Math.round(r.x+40),y:Math.round(r.y+40)}})()`);
+      win.webContents.sendInputEvent({ type: 'mouseDown', x: nb.x, y: nb.y, button: 'left', clickCount: 1 }); win.webContents.sendInputEvent({ type: 'mouseUp', x: nb.x, y: nb.y, button: 'left', clickCount: 1 });
+      await sleep(400);
+      await js(`(()=>{S.cvTool='draw';drawPage();})()`); await sleep(500);
+      win.webContents.sendInputEvent({ type: 'mouseDown', x: 220, y: 660, button: 'left', clickCount: 1 });
+      for (let i = 1; i <= 8; i++) win.webContents.sendInputEvent({ type: 'mouseMove', x: 220 + i * 22, y: 660 + (i % 2) * 26, button: 'left', modifiers: ['leftButtonDown'] });
+      win.webContents.sendInputEvent({ type: 'mouseUp', x: 400, y: 680, button: 'left', clickCount: 1 });
+      await sleep(1500);
+      const cvs = JSON.parse(fs.readFileSync(path.join(p.agentsDir, 'board.json'), 'utf8')).canvas;
+      log('a link, a comment pin and a drawing are saved', cvs.links.length === 1 && cvs.links[0].kind === 'check' && cvs.pins.length === 1 && cvs.pins[0].agentId === 'qa' && cvs.ink.length === 1, JSON.stringify({ links: cvs.links, pins: cvs.pins.length, ink: cvs.ink.length }));
+      log('the link shows as a line that can be clicked', (await js(`document.querySelectorAll('#page .edge.user.check').length`)) === 1 && (await js(`document.querySelectorAll('#page .edge.hit').length`)) === 1 && (await js(`document.querySelectorAll('#page .node .ball').length`)) === 4);
+      await shot('34_canvas_tools');
+      await js(`(()=>{S.cvTool='move';drawPage();})()`); await sleep(300);
+      // new game: files, workflow quiz, kickoff, mockup approval
+      const storyFile = path.join(ROOT, 'story.txt'); fs.writeFileSync(storyFile, 'Once upon a time');
+      const badFile = path.join(ROOT, 'tool.exe'); fs.writeFileSync(badFile, 'MZ');
+      const ngr = await js(`window.deck.intakeAdd(S.tabs[0].key, 'story', ${JSON.stringify([storyFile, badFile])})`);
+      log('new game: a story file is copied and a program file is refused', ngr.files.story.length === 1 && ngr.skipped.length === 1 && fs.existsSync(path.join(p.path, 'source', 'story', 'story.txt')) && !fs.existsSync(path.join(p.path, 'source', 'story', 'tool.exe')), JSON.stringify(ngr).slice(0, 200));
+      const badSlot = await js(`window.deck.intakeAdd(S.tabs[0].key, '../../x', []).then(() => 'ok', e => e.message)`);
+      log('new game: an unknown kind of file is refused', /Unknown kind/.test(badSlot), badSlot);
+      await js(`goNewGame()`); await sleep(300);
+      await js(`(()=>{NG.key=S.tabs[0].key;ngGo(1);})()`); await sleep(700);
+      log('new game: the files step shows four boxes', (await js(`document.querySelectorAll('#page .slot').length`)) === 4 && /1 added/.test(await js(`document.querySelector('#page .slot').textContent`)));
+      await shot('35_newgame_files');
+      await js(`ngGo(2)`); await sleep(300);
+      await js(`document.querySelector('#page .quiz .opt').click()`); await sleep(300);
+      log('new game: an answer moves the quiz to question 2', /Question 2 of 12/.test(await js(`document.querySelector('#page .quiz').textContent`)));
+      await shot('36_newgame_quiz');
+      await js(`ngFinish(S.tabs[0], QUIZ.map(([q], i) => ({ q, a: NG.answers[i] || '' })))`); await sleep(1300);
+      const wf = fs.existsSync(path.join(p.path, 'WORKFLOW.md')) ? fs.readFileSync(path.join(p.path, 'WORKFLOW.md'), 'utf8') : '';
+      log('new game: the workflow file holds the answer and the fixed rules', /Simulator or tycoon/.test(wf) && /Publishing always waits/.test(wf) && (await js(`!!S.tabs[0].board.canvas.kickoff`)) === true && (await js(`!!document.querySelector('#page .kick')`)) === true, wf.slice(0, 120));
+      await shot('37_kickoff');
+      await js(`(()=>{S.page='approval';paintPage();})()`); await sleep(900);
+      log('mockup approval shows 12 picture places', (await js(`document.querySelectorAll('#page .shot').length`)) === 12);
+      await shot('38_approval');
+      await js(`(()=>{delete S.tabs[0].board.canvas.kickoff; S.tabs[0].save();})()`);
       await js(`studioView('board')`); await sleep(500);
       const modes = [];
       for (const m of ['orbit', 'lanes', 'timeline', 'flow', 'tree']) { await js(`document.querySelector('#navbar .lays button[aria-label="${m[0].toUpperCase() + m.slice(1)} layout"]').click()`); await sleep(500); modes.push(await js(`S.tabs[0].board.mode`)); if (m !== 'tree') await shot('31_layout_' + m); }

@@ -1,6 +1,6 @@
 // Orbie Studio: the narrow bridge between the window and the main process.
 'use strict';
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 
 async function call(name, ...args) {
   const r = await ipcRenderer.invoke(name, ...args);
@@ -59,6 +59,11 @@ contextBridge.exposeInMainWorld('deck', {
   clipRead: () => call('clipboard:read'),
   clipWrite: (t) => call('clipboard:write', t),
   saveSettings: (patch) => call('settings:save', patch),
+  intakeList: (key) => call('intake:list', key),
+  intakeAdd: (key, slot, files) => call('intake:add', key, slot, files),
+  intakePick: (key, slot) => call('intake:pick', key, slot),
+  saveWorkflow: (key, o) => call('workflow:save', key, o),
+  pathFor: (file) => { try { return webUtils.getPathForFile(file); } catch (e) { return ''; } },
   replies: (key) => call('replies:list', key),
   remoteInfo: () => call('remote:info'),
   remoteSet: (patch) => call('remote:set', patch),

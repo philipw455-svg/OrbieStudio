@@ -65,7 +65,7 @@ function renderNav() {
     right.append(h('nav', { class: 'lays glassbar', 'aria-label': 'Studio layout' }, LAYOUTS.map(([id, name, ic]) =>
       h('button', { class: curLayout(ws) === id ? 'on' : '', title: `${name} layout`, 'aria-label': `${name} layout`, html: ic, on: { click: () => setLayout(ws, id) } }))));
   } else {
-    right.append(h('button', { class: 'btn primary big', title: 'Pick a folder for the game', text: 'New game', on: { click: openProjectFlow } }));
+    right.append(h('button', { class: 'btn primary big', title: 'Start a new game: folder, files and the workflow quiz', text: 'New game', on: { click: goNewGame } }));
   }
   right.append(h('button', { class: 'btn round big', title: 'Choose a theme', 'aria-label': 'Choose a theme', html: NAV_ICON.theme,
     on: { click: (e) => menu(e.currentTarget, [{ head: 'Theme' }, ...THEMES.map(t => ({ label: t.name, sub: t.id === curTheme() ? 'On now' : t.sub, run: () => setTheme(t.id) }))]) } }));
@@ -93,7 +93,7 @@ function pageDirty() {
   clearTimeout(dirtyTimer);
   dirtyTimer = setTimeout(() => {
     renderNav();
-    if (pageEl.hidden || S.page === 'usage') return;
+    if (pageEl.hidden || ['usage', 'newgame', 'approval'].includes(S.page)) return;
     if (S.page === 'studio') { const w = activeWs(); if (w && w.team && typeof refreshCanvas === 'function') refreshCanvas(w); return; }
     const f = document.activeElement;
     if (f && pageEl.contains(f) && /^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName)) return pageDirty(); // never wipe text the owner is typing
@@ -107,7 +107,7 @@ function needGame(what) {
 }
 function drawPage() {
   const ws = activeWs();
-  const P = { home: pageHome, studio: pageStudio, previews: pagePreviews, status: pageStatus, usage: pageUsage, team: pageTeam, questions: pageQuestions }[S.page] || pageHome;
+  const P = { home: pageHome, studio: pageStudio, previews: pagePreviews, status: pageStatus, usage: pageUsage, team: pageTeam, questions: pageQuestions, newgame: pageNewGame, approval: pageApproval }[S.page] || pageHome;
   pageEl.className = 'screen page p-' + S.page;
   put(pageEl, h('div', { class: 'page-in' }, P(ws)));
 }
@@ -181,7 +181,7 @@ function pageHome(ws) {
   const ok = (good, text) => h('span', { class: 'chip ' + (good ? 'ok' : 'warn'), text: (good ? '✓ ' : '! ') + text });
   return [
     h('header', { class: 'hero' }, h('img', { src: 'logo.svg', alt: '' }), h('div', null, h('h1', { text: 'Orbie Studio' }), h('p', { class: 'tagline', text: 'Your team\'s AI game studio' })),
-      h('div', { class: 'pacts' }, ws ? h('button', { class: 'btn big', text: 'Open the Studio', on: { click: () => studioView('canvas') } }) : null, h('button', { class: 'btn big' + (ws ? '' : ' primary'), text: 'Open project folder', on: { click: openProjectFlow } }))),
+      h('div', { class: 'pacts' }, ws ? h('button', { class: 'btn big', text: 'Open the Studio', on: { click: () => studioView('canvas') } }) : null, ws && ws.team ? h('button', { class: 'btn big', text: 'Mockup approval', on: { click: () => { S.page = 'approval'; paintPage(); } } }) : null, h('button', { class: 'btn big' + (ws ? '' : ' primary'), text: 'Open project folder', on: { click: openProjectFlow } }))),
     ws ? rocketStrip(ws) : needGame('Pick the folder of a game. Its agents start side by side, and the rocket flight begins.'),
     h('div', { class: 'cols3' }, games, agents, needs),
     h('footer', { class: 'pc' }, ok(!!info.claudePath, 'Claude Code'), ok(!!info.gitPath, 'Git'), ok(!!info.curlPath, 'Status lights'),
