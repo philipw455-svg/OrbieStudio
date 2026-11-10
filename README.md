@@ -5,7 +5,7 @@
 <p align="center"><b>Your team's AI game studio</b><br>A team of AI agents builds your Roblox game with you.</p>
 
 <p align="center">
-  <a href="https://github.com/ki11phil0405-bit/agent-deck/releases/latest"><b>Download the installer</b></a>
+  <a href="https://github.com/ki11phil0405-bit/OrbieStudio/releases/latest"><b>Download the installer</b></a>
   &nbsp;·&nbsp;
   <a href="src/guide/Orbie%20Studio%20Quick%20Guide.pdf"><b>Quick guide (PDF)</b></a>
   &nbsp;·&nbsp;
@@ -48,7 +48,7 @@ Do these steps once. Each link opens the official page.
 
 ## 3. Install Orbie Studio
 
-1. Open the [newest release](https://github.com/ki11phil0405-bit/agent-deck/releases/latest).
+1. Open the [newest release](https://github.com/ki11phil0405-bit/OrbieStudio/releases/latest).
 2. Download `Orbie-Studio-Setup-x.y.z.exe`. The quick guide is on the same page.
 3. Run the installer. Windows may say "Windows protected your PC". Click **More info**, then **Run anyway**. The app is not code-signed yet.
 4. Open Orbie Studio from the desktop or the Start menu.

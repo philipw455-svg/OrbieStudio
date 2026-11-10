@@ -10,7 +10,7 @@ const crypto = require('crypto');
 const { execSync } = require('child_process');
 const root = path.join(__dirname, '..');
 const pkg = require(path.join(root, 'package.json'));
-const REPO = 'ki11phil0405-bit/agent-deck';
+const REPO = 'ki11phil0405-bit/OrbieStudio';
 const sha = (f) => crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
 const files = [];
 (function walk(d) {

@@ -1190,7 +1190,7 @@ function runLauncher(key, id) {
 // version and lists every file with its SHA-256. Files are downloaded from that version's git tag and checked before
 // anything is replaced. A folder that the owner picked still works as a fallback.
 
-const UPDATE_REPO = 'ki11phil0405-bit/agent-deck';
+const UPDATE_REPO = 'ki11phil0405-bit/OrbieStudio';
 const PRODUCT = 'orbie-studio';              // an update must carry this name, so an update for another app can never install over Orbie Studio
 const UPDATE_LIST = 'update/orbie-studio.json';
 const TESTING = !!process.env.AGENT_DECK_SELFTEST && !app.isPackaged;
